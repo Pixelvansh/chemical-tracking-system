@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Consumer Dashboard — ChemTrack India</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="consumer.css"/>
+</head>
+<body>
+<script>
+  const _sess = localStorage.getItem('chemtrack_session');
+  if (!_sess) { window.location.href = 'login.html'; }
+  else {
+    const _s = JSON.parse(_sess);
+    if (_s.role !== 'consumer' || _s.status !== 'approved') window.location.href = 'login.html';
+  }
+</script>
+
+<nav class="dash-navbar">
+  <div class="nav-left">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <img src="logo.png" class="nav-logo"/>
+    <div class="nav-title"><span>ChemTrack India</span><span>Consumer Portal</span></div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info">
+      <span class="nav-user-name" id="nav-company-name">Loading...</span>
+      <span class="nav-user-role">🏥 Consumer</span>
+    </div>
+    <button class="nav-logout" onclick="consumerLogout()">Logout 🚪</button>
+  </div>
+</nav>
+<div class="tricolor-bar"><span></span><span></span><span></span></div>
+
+<div class="dash-layout">
+  <aside class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+      <li><a href="#" class="sidebar-item active" onclick="showSection('dashboard',this);return false;"><span class="s-icon">📊</span><span class="s-text">Dashboard</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('request',this);return false;"><span class="s-icon">📝</span><span class="s-text">Request Chemical</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('receive',this);return false;"><span class="s-icon">📥</span><span class="s-text">Receive Chemical</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('mystock',this);return false;"><span class="s-icon">📦</span><span class="s-text">My Stock</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('usage',this);return false;"><span class="s-icon">📊</span><span class="s-text">Usage Log</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('history',this);return false;"><span class="s-icon">📜</span><span class="s-text">Request History</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('compliance',this);return false;"><span class="s-icon">✅</span><span class="s-text">Compliance</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('profile',this);return false;"><span class="s-icon">🏢</span><span class="s-text">My Profile</span></a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>🇮🇳 NCB Approved Consumer</p>
+      <p id="sidebar-urn">URN: Loading...</p>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+
+    <!-- DASHBOARD -->
+    <div class="content-section active" id="section-dashboard">
+      <div class="section-header">
+        <div><h1 id="welcome-msg">Welcome, Consumer</h1><p class="section-desc" id="welcome-sub">NCB Approved — Consumer Portal</p></div>
+        <span class="approved-badge">✅ NCB APPROVED</span>
+      </div>
+      <div class="cards-grid">
+        <div class="summary-card teal"><div class="card-icon">📦</div><div class="card-info"><span class="card-number" id="stat-stock">0</span><span class="card-label">Stock Available (kg)</span></div></div>
+        <div class="summary-card orange"><div class="card-icon">📝</div><div class="card-info"><span class="card-number" id="stat-pending">0</span><span class="card-label">Pending Requests</span></div></div>
+        <div class="summary-card green"><div class="card-icon">✅</div><div class="card-info"><span class="card-number" id="stat-approved">0</span><span class="card-label">Received Orders</span></div></div>
+        <div class="summary-card navy"><div class="card-icon">📊</div><div class="card-info"><span class="card-number" id="stat-used">0</span><span class="card-label">Total Used (kg)</span></div></div>
+      </div>
+      <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="qa-grid">
+          <button class="qa-btn teal" onclick="showSection('request',this)">📝 Request Chemical from Retailer</button>
+          <button class="qa-btn green" onclick="showSection('receive',this)">📥 Receive via Barcode Scan</button>
+          <button class="qa-btn orange" onclick="showSection('usage',this)">📊 Log Usage</button>
+          <button class="qa-btn navy" onclick="showSection('history',this)">📜 View History</button>
+        </div>
+      </div>
+      <div class="table-section">
+        <div class="table-header"><h3>Recent Requests</h3></div>
+        <table class="data-table">
+          <thead><tr><th>Request ID</th><th>Chemical</th><th>Qty (kg)</th><th>Retailer</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="recent-tbody"><tr><td colspan="6" class="empty-td">No requests yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REQUEST CHEMICAL (NAYA — Retailer ko bhejta hai) -->
+    <div class="content-section" id="section-request">
+      <div class="section-header"><h1>📝 Request Chemical</h1><span class="section-desc">Request chemicals from NCB-approved retailers — blockchain tracked</span></div>
+
+      <div class="info-box teal">
+        <span>ℹ️</span>
+        <div>
+          <p><strong>Note:</strong> Enter Your Details</p>
+          <p style="font-size:0.82rem;color:var(--gray);margin-top:4px">Retailer ke approve karne ke baad aap barcode scan karke receive kar sakte hain.</p>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3 class="form-card-title">📝 New Chemical Request</h3>
+        <div class="alert" id="request-alert"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Chemical Name <span class="req">*</span></label>
+            <select class="form-input" id="req-chemical">
+              <option value="">Select chemical</option>
+              <option>Acetic Anhydride</option>
+              <option>Ephedrine</option>
+              <option>Pseudoephedrine</option>
+              <option>Potassium Permanganate</option>
+              <option>Phenylacetic Acid</option>
+              <option>Hydrochloric Acid</option>
+              <option>Sulphuric Acid</option>
+              <option>Toluene</option>
+              <option>Acetone</option>
+              <option>Other (specify in notes)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quantity (kg) <span class="req">*</span></label>
+            <input type="number" class="form-input" id="req-qty" placeholder="e.g. 100"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Retailer Name <span class="req">*</span></label>
+            <input type="text" class="form-input" id="req-retailer" placeholder="Retailer company name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Retailer Email</label>
+            <input type="email" class="form-input" id="req-retailer-email" placeholder="retailer@example.com"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Purpose of Use <span class="req">*</span></label>
+            <select class="form-input" id="req-purpose">
+              <option value="">Select purpose</option>
+              <option>Pharmaceutical Manufacturing</option>
+              <option>Research &amp; Development</option>
+              <option>Industrial Use</option>
+              <option>Hospital/Medical Use</option>
+              <option>Laboratory Use</option>
+              <option>Agricultural Use</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes / Remarks</label>
+          <input type="text" class="form-input" id="req-notes" placeholder="Any special requirements..."/>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="submitRetailerRequest()">📝 Send Request to Retailer</button>
+        </div>
+      </div>
+
+      <!-- My sent requests -->
+      <div class="section-card" style="margin-top:1.5rem">
+        <h3 class="form-card-title">📜 My Sent Requests (Blockchain)</h3>
+        <table class="data-table">
+          <thead><tr><th>Request ID</th><th>Retailer</th><th>Chemical</th><th>Qty</th><th>Status</th><th>Barcode</th><th>Date</th></tr></thead>
+          <tbody id="my-retailer-requests-tbody"><tr><td colspan="7" class="empty-td">No requests sent yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RECEIVE CHEMICAL via barcode (NAYA) -->
+    <div class="content-section" id="section-receive">
+      <div class="section-header"><h1>📥 Receive Chemical</h1><span class="section-desc">Retailer ka barcode scan karke delivery confirm karo — blockchain updated</span></div>
+      <div class="form-card">
+        <h3 class="form-card-title">🔍 Enter / Scan Barcode ID from Retailer</h3>
+        <div class="alert" id="receive-alert"></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Barcode ID <span class="req">*</span></label>
+            <div class="input-with-btn">
+              <input type="text" id="receive-barcode-id" class="form-input" placeholder="Enter barcode ID from retailer"/>
+              <button class="btn-secondary" onclick="verifyConsumerReceive()">🔍 Verify</button>
+            </div>
+          </div>
+        </div>
+        <div id="consumer-verify-result"></div>
+        <div id="consumer-confirm-form" style="display:none">
+          <div class="form-grid" style="margin-top:1rem">
+            <div class="form-group"><label>Received At City</label>
+              <select id="consumer-receive-city" class="form-input"><option value="">-- Select City --</option></select>
+            </div>
+            <div class="form-group"><label>Received By</label><input type="text" id="consumer-receive-by" class="form-input" placeholder="Name"/></div>
+          </div>
+          <button class="btn-primary" onclick="confirmConsumerReceive()">✅ Confirm Receipt — Delivery Complete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY STOCK -->
+    <div class="content-section" id="section-mystock">
+      <div class="section-header"><h1>📦 My Stock</h1><span class="section-desc">Current chemical stock at your facility</span></div>
+      <div class="table-section">
+        <div class="table-header"><h3>Available Stock</h3><span style="font-size:0.82rem;color:var(--gray)">NCB auditable at any time</span></div>
+        <table class="data-table">
+          <thead><tr><th>#</th><th>Chemical</th><th>Available (kg)</th><th>Received From</th><th>Last Updated</th><th>Status</th></tr></thead>
+          <tbody id="stock-tbody"><tr><td colspan="6" class="empty-td">No stock available. Receive chemicals to update stock.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USAGE LOG -->
+    <div class="content-section" id="section-usage">
+      <div class="section-header"><h1>📊 Usage Log</h1><span class="section-desc">Record chemical usage — mandatory for NCB compliance</span></div>
+      <div class="form-card">
+        <h3 class="form-card-title">📊 Log Chemical Usage</h3>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Chemical Used <span class="req">*</span></label><input type="text" class="form-input" id="use-chemical" placeholder="Chemical name"/></div>
+          <div class="form-group"><label class="form-label">Quantity Used (kg) <span class="req">*</span></label><input type="number" class="form-input" id="use-qty" placeholder="e.g. 50"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Process / Purpose <span class="req">*</span></label><input type="text" class="form-input" id="use-process" placeholder="e.g. Batch production B2024-03"/></div>
+          <div class="form-group"><label class="form-label">Date of Use</label><input type="date" class="form-input" id="use-date"/></div>
+        </div>
+        <div class="form-group"><label class="form-label">Remarks</label><input type="text" class="form-input" id="use-remarks" placeholder="Any notes..."/></div>
+        <div class="form-actions">
+          <button class="btn-secondary" onclick="clearUsageForm()">Clear</button>
+          <button class="btn-primary" onclick="logUsage()">📊 Log Usage</button>
+        </div>
+        <div id="usage-alert" class="alert"></div>
+      </div>
+      <div class="table-section">
+        <div class="table-header"><h3>Usage Records</h3></div>
+        <table class="data-table">
+          <thead><tr><th>#</th><th>Chemical</th><th>Qty Used</th><th>Process</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="usage-tbody"><tr><td colspan="6" class="empty-td">No usage logged yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="content-section" id="section-history">
+      <div class="section-header"><h1>📜 Request History</h1><span class="section-desc">All chemical requests and receipts</span></div>
+      <div class="table-section">
+        <table class="data-table">
+          <thead><tr><th>#</th><th>Request ID</th><th>Type</th><th>Chemical</th><th>Qty</th><th>Party</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="history-tbody"><tr><td colspan="8" class="empty-td">No history yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COMPLIANCE -->
+    <div class="content-section" id="section-compliance">
+      <div class="section-header"><h1>✅ Compliance Status</h1><span class="section-desc">Your NCB compliance overview</span></div>
+      <div class="compliance-grid">
+        <div class="compliance-card green"><div class="comp-icon">✅</div><div class="comp-info"><span class="comp-title">Registration Status</span><span class="comp-value green-text">NCB APPROVED</span></div></div>
+        <div class="compliance-card green"><div class="comp-icon">📄</div><div class="comp-info"><span class="comp-title">Drug License</span><span class="comp-value green-text">VALID</span></div></div>
+        <div class="compliance-card teal"><div class="comp-icon">📊</div><div class="comp-info"><span class="comp-title">Compliance Score</span><span class="comp-value teal-text" id="comp-score">100%</span></div></div>
+        <div class="compliance-card blue"><div class="comp-icon">🔗</div><div class="comp-info"><span class="comp-title">Blockchain Records</span><span class="comp-value blue-text" id="comp-records">0 entries</span></div></div>
+      </div>
+      <div class="compliance-rules">
+        <h3>NCB Compliance Rules for Consumers</h3>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>All purchases must go through NCB-approved retailer chain</span></div>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>Every receipt must be confirmed via barcode scan — blockchain entry mandatory</span></div>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>Chemical usage must be logged within 24 hours</span></div>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>Stock levels must match approved purchase quantities</span></div>
+        <div class="rule-item"><span class="rule-icon orange-text">⚠️</span><span>Monthly usage report submission to NCB is mandatory</span></div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="content-section" id="section-profile">
+      <div class="section-header"><h1>🏢 My Profile</h1></div>
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="profile-avatar">🏥</div>
+          <div><h2 id="prof-company">—</h2><span class="cat-badge">🏥 Consumer</span><span class="status-badge approved" style="margin-left:8px">✅ APPROVED</span></div>
+        </div>
+        <div class="profile-grid">
+          <div class="profile-field"><label>📧 Email</label><span id="prof-email">—</span></div>
+          <div class="profile-field"><label>📞 Phone</label><span id="prof-phone">—</span></div>
+          <div class="profile-field"><label>🏢 Company</label><span id="prof-company2">—</span></div>
+          <div class="profile-field"><label>👤 Owner</label><span id="prof-owner">—</span></div>
+          <div class="profile-field"><label>💼 Designation</label><span id="prof-designation">—</span></div>
+          <div class="profile-field"><label>📍 State</label><span id="prof-state">—</span></div>
+          <div class="profile-field"><label>🏙️ City</label><span id="prof-city">—</span></div>
+          <div class="profile-field"><label>🪪 GST</label><span id="prof-gst">—</span></div>
+          <div class="profile-field"><label>🏛️ URN</label><span id="prof-urn">—</span></div>
+          <div class="profile-field"><label>📋 PAN</label><span id="prof-pan">—</span></div>
+          <div class="profile-field"><label>💊 Drug License</label><span id="prof-drug-license">—</span></div>
+          <div class="profile-field"><label>🏭 Purpose</label><span id="prof-purpose">—</span></div>
+          <div class="profile-field"><label>📦 Monthly Need</label><span id="prof-monthly">—</span></div>
+          <div class="profile-field"><label>📅 Registered</label><span id="prof-registered">—</span></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="barcode-engine.js"></script>
+<script src="consumer.js"></script>
+</body>
+</html>

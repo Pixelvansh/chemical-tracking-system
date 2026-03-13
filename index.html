@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChemTrack India — Control the Chemical, Secure the Nation</title>
+  <meta name="description" content="End-to-End Precursor Chemical Tracking System by NCB. Blockchain + AI powered national security platform." />
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="stylesheet" href="landing.css" />
+
+  <style>
+    /* ── Extra styles for new elements ── */
+
+    .hero-note {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+    }
+    .hero-note a {
+      color: var(--orange);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .hero-note a:hover { text-decoration: underline; }
+
+    .user-register-btn {
+      display: inline-block;
+      margin-top: 1.2rem;
+      padding: 8px 18px;
+      background: var(--orange);
+      color: white;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .user-register-btn:hover { background: #c96800; }
+
+    .step-link {
+      display: inline-block;
+      margin-top: 1rem;
+      color: var(--orange);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .step-link:hover { text-decoration: underline; }
+
+    /* More roles row */
+    .more-roles-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .more-role-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--off-white);
+      border: 1px solid var(--gray-light);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .more-role-card span:first-child {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+    .more-role-card div strong {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--navy);
+      font-weight: 700;
+    }
+    .more-role-card div p {
+      font-size: 0.78rem;
+      color: var(--gray);
+      margin-top: 2px;
+    }
+    .more-role-card a {
+      margin-left: auto;
+      flex-shrink: 0;
+      color: var(--orange);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .more-role-card a:hover { text-decoration: underline; }
+
+    /* Features extra grid */
+    .features-extra {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+    .extra-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: white;
+      border: 1px solid var(--gray-light);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .extra-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .extra-item strong {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--navy);
+      font-weight: 700;
+    }
+    .extra-item p {
+      font-size: 0.78rem;
+      color: var(--gray);
+      margin-top: 3px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+      .more-roles-row,
+      .features-extra { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <img src="logo.png" alt="ChemTrack Logo" class="nav-logo" />
+      <div class="nav-title">
+        <span>ChemTrack India</span>
+        <span>National Chemical Authority · by NCB</span>
+      </div>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#how-it-works" onclick="closeNav()">How It Works</a></li>
+      <li><a href="#users" onclick="closeNav()">Users</a></li>
+      <li><a href="#features" onclick="closeNav()">Features</a></li>
+      <li><a href="#problem" onclick="closeNav()">Problem</a></li>
+      <li><a href="login.html" class="nav-btn-outline">Login</a></li>
+      <li>
+        <a href="#" class="nav-btn" onclick="goToRegister(event)">Register</a>
+      </li>
+    </ul>
+    <button class="nav-hamburger" id="navHamburger" onclick="toggleNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- TRICOLOR BAR -->
+  <div class="tricolor-bar">
+    <span></span><span></span><span></span>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       HERO SECTION
+  ═══════════════════════════════════════ -->
+  <section class="hero" id="home">
+    <div class="hero-map-bg">🗺</div>
+    <div class="hero-container">
+
+      <!-- Left -->
+      <div class="hero-content">
+        <div class="hero-badge">
+          🇮🇳 Government of India · Ministry of Home Affairs
+        </div>
+        <h1 class="hero-title">
+          <span class="highlight">Control</span> the Chemical,<br/>
+          <span class="highlight-green">Secure</span> the Nation
+        </h1>
+        <p class="hero-tagline">"Track Every Gram. Prevent Every Harm."</p>
+        <p class="hero-desc">
+          India's first end-to-end Blockchain + AI powered precursor chemical
+          tracking system. From factory to pharmacy — every gram accounted for.
+          Preventing drugs, explosives, illegal exports, and national security
+          threats at the source.
+        </p>
+        <div class="hero-buttons">
+          <a href="#" class="btn-primary" onclick="goToRegister(event)">
+            📋 Register Your Firm
+          </a>
+          <a href="login.html" class="btn-secondary">
+            🔐 Login to Portal
+          </a>
+        </div>
+        <p class="hero-note">
+          Already registered?
+          <a href="login.html">Login here →</a>
+        </p>
+      </div>
+
+      <!-- Right — Stats -->
+      <div class="hero-stats">
+        <div class="stat-card orange-accent">
+          <span class="stat-number">₹2.5L Cr</span>
+          <span class="stat-label">Illegal Drug Market Fueled by Diverted Chemicals</span>
+        </div>
+        <div class="stat-card green-accent">
+          <span class="stat-number">23M+</span>
+          <span class="stat-label">Drug Users in India — Chemical Supply Must Stop</span>
+        </div>
+        <div class="stat-card orange-accent">
+          <span class="stat-number">1000+</span>
+          <span class="stat-label">IED & Bomb Blasts Using Diverted Precursor Chemicals</span>
+        </div>
+        <div class="stat-card green-accent">
+          <span class="stat-number">$10.7B</span>
+          <span class="stat-label">Illegal Chemical Export to Drug Cartels Worldwide</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       STATS BANNER
+  ═══════════════════════════════════════ -->
+  <div class="stats-banner">
+    <div class="stats-banner-grid container">
+      <div class="banner-stat">
+        <span class="banner-number" data-target="25330" data-suffix=" Cr">₹0</span>
+        <span class="banner-label">Worth of Drugs Produced Using Indian Chemicals (2024)</span>
+      </div>
+      <div class="banner-stat">
+        <span class="banner-number" data-target="60" data-suffix="%">0%</span>
+        <span class="banner-label">Explosives & IEDs Made from Diverted Industrial Chemicals</span>
+      </div>
+      <div class="banner-stat">
+        <span class="banner-number" data-target="4000" data-suffix=" kg">0</span>
+        <span class="banner-label">Chemicals Illegally Exported to Mexico Cartel — One Case Alone</span>
+      </div>
+      <div class="banner-stat">
+        <span class="banner-number" data-target="3" data-suffix=" Portals">0</span>
+        <span class="banner-label">Existing NCB Portals — Zero Physical Tracking</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       HOW IT WORKS
+  ═══════════════════════════════════════ -->
+  <section class="section section-gray" id="how-it-works">
+    <div class="container">
+      <div class="section-badge">Process</div>
+      <h2 class="section-title">How <span>ChemTrack</span> Works</h2>
+      <p class="section-subtitle">
+        A 5-step chain of custody that makes chemical diversion physically
+        impossible — whether for drugs, explosives, or illegal exports.
+      </p>
+      <div class="title-underline"></div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <span class="step-icon">📋</span>
+          <h3 class="step-title">Register & Get URN</h3>
+          <p class="step-desc">
+            Company registers on portal. NCB verifies documents and issues
+            Unique Registration Number (URN).
+            <strong>No URN = No chemical.</strong>
+          </p>
+          <a href="#" class="step-link" onclick="goToRegister(event)">
+            Register Your Firm →
+          </a>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <span class="step-icon">✅</span>
+          <h3 class="step-title">NCB Approves Purchase</h3>
+          <p class="step-desc">
+            Before buying raw material, manufacturer requests NCB approval.
+            Quantity, supplier, and purpose verified in real-time.
+          </p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <span class="step-icon">🔲</span>
+          <h3 class="step-title">Hierarchical QR Generated</h3>
+          <p class="step-desc">
+            Every drum gets a unique QR code. When split between parties,
+            parent QR divides into child QRs — all linked and tracked on
+            blockchain.
+          </p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">4</div>
+          <span class="step-icon">📍</span>
+          <h3 class="step-title">GPS + Scan at Every Step</h3>
+          <p class="step-desc">
+            Every handover requires mandatory QR scan. GPS captured
+            automatically. Quantity mismatch = instant NCB alert with
+            exact location.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       PORTAL USERS
+  ═══════════════════════════════════════ -->
+  <section class="section" id="users">
+    <div class="container">
+      <div class="section-badge">Portal Users</div>
+      <h2 class="section-title">Who <span>Uses</span> ChemTrack?</h2>
+      <p class="section-subtitle">
+        Six types of users — each with their own secure role-based dashboard
+        and mandatory responsibilities in the chain of custody.
+      </p>
+      <div class="title-underline"></div>
+
+      <div class="users-grid">
+
+        <div class="user-card ncb">
+          <span class="user-icon">👮</span>
+          <h3 class="user-title">NCB Admin</h3>
+          <p class="user-desc">
+            National Command Center — monitors all chemical movement
+            across India in real-time. No registration needed.
+          </p>
+          <ul class="user-features">
+            <li>Live India Map Dashboard</li>
+            <li>Approve / Reject firms & requests</li>
+            <li>Manage all alerts</li>
+            <li>Full blockchain audit trail</li>
+            <li>Auto quarterly reports</li>
+          </ul>
+        </div>
+
+        <div class="user-card manufacturer">
+          <span class="user-icon">🏭</span>
+          <h3 class="user-title">Manufacturer</h3>
+          <p class="user-desc">
+            Chemical manufacturing companies. Request, produce, and
+            dispatch — all under NCB supervision.
+          </p>
+          <ul class="user-features">
+            <li>Raw material approval request</li>
+            <li>Create batches with QR codes</li>
+            <li>Hierarchical QR split system</li>
+            <li>GPS-tracked dispatch</li>
+            <li>Waste logging & mass balance</li>
+          </ul>
+          <a href="#" class="user-register-btn" onclick="goToRegister(event)">
+            Register as Manufacturer →
+          </a>
+        </div>
+
+        <div class="user-card distributor">
+          <span class="user-icon">🚚</span>
+          <h3 class="user-title">Distributor</h3>
+          <p class="user-desc">
+            Middle supply chain link. Receives, verifies, and forwards
+            chemicals — every step scanned.
+          </p>
+          <ul class="user-features">
+            <li>QR scan on receive</li>
+            <li>Quantity verification</li>
+            <li>Split & forward chemicals</li>
+            <li>Live GPS location</li>
+            <li>Inventory tracking</li>
+          </ul>
+          <a href="#" class="user-register-btn" onclick="goToRegister(event)">
+            Register as Distributor →
+          </a>
+        </div>
+
+        <div class="user-card consumer">
+          <span class="user-icon">🏥</span>
+          <h3 class="user-title">Consumer</h3>
+          <p class="user-desc">
+            Hospitals and pharma companies — final users who must log
+            usage for Mass Balance verification.
+          </p>
+          <ul class="user-features">
+            <li>Receive & confirm delivery</li>
+            <li>Monthly usage log</li>
+            <li>Mass balance verification</li>
+            <li>Medicine production log</li>
+            <li>Compliance tracking</li>
+          </ul>
+          <a href="#" class="user-register-btn" onclick="goToRegister(event)">
+            Register as Consumer →
+          </a>
+        </div>
+
+      </div>
+
+      <!-- More roles -->
+      <div class="more-roles-row">
+        <div class="more-role-card">
+          <span>📦</span>
+          <div>
+            <strong>Supplier</strong>
+            <p>Raw material suppliers under NCB monitoring</p>
+          </div>
+          <a href="#" onclick="goToRegister(event)">Register →</a>
+        </div>
+        <div class="more-role-card">
+          <span>🏪</span>
+          <div>
+            <strong>Retailer</strong>
+            <p>Retail chemical shops with stock tracking</p>
+          </div>
+          <a href="#" onclick="goToRegister(event)">Register →</a>
+        </div>
+        <div class="more-role-card">
+          <span>✈️</span>
+          <div>
+            <strong>Exporter</strong>
+            <p>Export firms with DGFT & customs integration</p>
+          </div>
+          <a href="#" onclick="goToRegister(event)">Register →</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       3 UNIQUE FEATURES
+  ═══════════════════════════════════════ -->
+  <section class="section section-gray" id="features">
+    <div class="container">
+      <div class="section-badge">Innovation</div>
+      <h2 class="section-title">3 <span>Unique</span> Features</h2>
+      <p class="section-subtitle">
+        Capabilities that no existing portal in India — or the world —
+        has for precursor chemical tracking.
+      </p>
+      <div class="title-underline"></div>
+
+      <div class="features-grid">
+        <div class="feature-card orange">
+          <div class="feature-tag">World First</div>
+          <span class="feature-icon">🔲</span>
+          <h3 class="feature-title">Hierarchical QR System</h3>
+          <p class="feature-desc">
+            When 500kg chemical splits between multiple parties, the Master QR
+            divides into child QRs — all linked in a parent-child chain.
+            Every split tracked. Every gram accounted for.
+            500kg splits into 200+250 but only 400 confirmed —
+            <strong>100kg missing = instant NCB alert.</strong>
+          </p>
+        </div>
+
+        <div class="feature-card navy">
+          <div class="feature-tag">Unique to ChemTrack</div>
+          <span class="feature-icon">⚖️</span>
+          <h3 class="feature-title">Mass Balance Checker</h3>
+          <p class="feature-desc">
+            Hospital received 1000kg chemical. Formula calculates
+            10,000 tablets should have been produced.
+            Actual: 5,000 tablets.
+            <strong>500kg unaccounted = drug/explosive production
+            suspected = NCB alert.</strong>
+            No portal anywhere in the world has this feature.
+          </p>
+        </div>
+
+        <div class="feature-card green">
+          <div class="feature-tag">Tamper Proof</div>
+          <span class="feature-icon">🔗</span>
+          <h3 class="feature-title">Blockchain Audit Trail</h3>
+          <p class="feature-desc">
+            Every transaction recorded on immutable blockchain.
+            No one — manufacturer, distributor, or NCB officer —
+            can alter any record.
+            <strong>Complete chain of custody from factory to end use.
+            Forever.</strong>
+          </p>
+        </div>
+      </div>
+
+      <!-- Extra features -->
+      <div class="features-extra">
+        <div class="extra-item">
+          <span class="extra-icon">📍</span>
+          <div>
+            <strong>Real-Time GPS Tracking</strong>
+            <p>Live location of every chemical shipment on India map</p>
+          </div>
+        </div>
+        <div class="extra-item">
+          <span class="extra-icon">🚨</span>
+          <div>
+            <strong>Instant Alert System</strong>
+            <p>Quantity mismatch, transit delay, overconsumption — in seconds</p>
+          </div>
+        </div>
+        <div class="extra-item">
+          <span class="extra-icon">🏛️</span>
+          <div>
+            <strong>Multi-Ministry Integration</strong>
+            <p>Connects NCB, DGFT, CBN, ED and Ministry of Defence</p>
+          </div>
+        </div>
+        <div class="extra-item">
+          <span class="extra-icon">📊</span>
+          <div>
+            <strong>Auto Compliance Reports</strong>
+            <p>Quarterly NDPS Act reports generated automatically</p>
+          </div>
+        </div>
+        <div class="extra-item">
+          <span class="extra-icon">🔐</span>
+          <div>
+            <strong>Role-Based Access Control</strong>
+            <p>Each firm sees only their relevant data — end-to-end security</p>
+          </div>
+        </div>
+        <div class="extra-item">
+          <span class="extra-icon">🤖</span>
+          <div>
+            <strong>AI Anomaly Detection</strong>
+            <p>Unusual consumption patterns flagged before diversion occurs</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       THREATS SECTION
+  ═══════════════════════════════════════ -->
+  <section class="section" id="threats">
+    <div class="container">
+      <div class="section-badge">National Security</div>
+      <h2 class="section-title">One Chemical. <span>Multiple Threats.</span></h2>
+      <p class="section-subtitle">
+        These are not just drug chemicals — they are national security risks.
+        ChemTrack addresses all of them at the source.
+      </p>
+      <div class="title-underline"></div>
+
+      <div class="users-grid">
+        <div class="user-card ncb">
+          <span class="user-icon">💊</span>
+          <h3 class="user-title">Drug Production</h3>
+          <p class="user-desc">
+            Acetic Anhydride diverted = Heroin.
+            Ephedrine diverted = Methamphetamine.
+            Rs. 2.5 lakh crore illegal market.
+          </p>
+          <ul class="user-features">
+            <li>23 million drug users in India</li>
+            <li>600% increase since 2004</li>
+            <li>60% meth now locally made</li>
+            <li>Destroys youth & families</li>
+          </ul>
+        </div>
+
+        <div class="user-card manufacturer">
+          <span class="user-icon">💣</span>
+          <h3 class="user-title">Explosives & IEDs</h3>
+          <p class="user-desc">
+            Potassium Permanganate and other precursors used in bomb
+            making. Same chemicals — different misuse.
+          </p>
+          <ul class="user-features">
+            <li>Used in terror attacks</li>
+            <li>IED manufacturing</li>
+            <li>Industrial sabotage</li>
+            <li>Civilian casualties</li>
+          </ul>
+        </div>
+
+        <div class="user-card distributor">
+          <span class="user-icon">🚢</span>
+          <h3 class="user-title">Illegal Export</h3>
+          <p class="user-desc">
+            Indian chemical companies illegally exporting precursors
+            to Mexico, Africa, and global drug cartels.
+          </p>
+          <ul class="user-features">
+            <li>4000kg single case seizure</li>
+            <li>India blacklisted by USA</li>
+            <li>Funds international crime</li>
+            <li>Damages India's reputation</li>
+          </ul>
+        </div>
+
+        <div class="user-card consumer">
+          <span class="user-icon">💸</span>
+          <h3 class="user-title">Money Laundering</h3>
+          <p class="user-desc">
+            Shell companies buy chemicals legally, sell to drug
+            networks, and launder black money through the process.
+          </p>
+          <ul class="user-features">
+            <li>Shell company networks</li>
+            <li>Black money whitening</li>
+            <li>Fake invoice fraud</li>
+            <li>Tax evasion</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       PROBLEM vs SOLUTION
+  ═══════════════════════════════════════ -->
+  <section class="section section-gray" id="problem">
+    <div class="container">
+      <div class="section-badge">Gap Analysis</div>
+      <h2 class="section-title">Existing System <span>vs</span> ChemTrack</h2>
+      <p class="section-subtitle">
+        India has 3 government portals for chemical regulation —
+        but none track physical movement of a single drum.
+      </p>
+      <div class="title-underline"></div>
+
+      <div class="problem-solution">
+        <div class="problem-box">
+          <h3 class="box-title">❌ Without ChemTrack — What Happens</h3>
+          <ul class="problem-list">
+            <li>Chemicals diverted to drug, bomb & cartel networks</li>
+            <li>Manufacturer self-reports quarterly — easily faked</li>
+            <li>No real-time GPS on any chemical movement</li>
+            <li>No QR codes on drums or containers</li>
+            <li>No mandatory buyer confirmation system</li>
+            <li>No AI anomaly or overconsumption detection</li>
+            <li>No mass balance — missing chemical undetected</li>
+            <li>Records can be altered — no blockchain</li>
+            <li>India blacklisted internationally for chemical exports</li>
+            <li>Thousands of lives lost every year</li>
+          </ul>
+        </div>
+
+        <div class="solution-box">
+          <h3 class="box-title">✅ With ChemTrack — What Changes</h3>
+          <ul class="solution-list">
+            <li>Real-time GPS tracking of every drum</li>
+            <li>Hierarchical QR on every container</li>
+            <li>Mandatory buyer scan & quantity confirmation</li>
+            <li>Instant NCB alert on any mismatch</li>
+            <li>Mass balance formula — missing chemical caught</li>
+            <li>Blockchain — tamper-proof forever</li>
+            <li>AI detects suspicious consumption patterns</li>
+            <li>Auto quarterly reports — no manual filing</li>
+            <li>GST & production cross-verification</li>
+            <li>India becomes global leader in chemical security</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       CTA SECTION
+  ═══════════════════════════════════════ -->
+  <section class="cta-section">
+    <div class="container">
+      <h2 class="cta-title">Join ChemTrack India Today</h2>
+      <p class="cta-subtitle">
+        Diverted chemicals don't just make drugs — they make bombs,
+        fund terrorism, enable illegal exports, and destroy communities.
+        ChemTrack ensures every gram of controlled chemical reaches only
+        its approved destination. Register your firm and be part of a safer India.
+      </p>
+      <div class="cta-buttons">
+        <a href="#" class="btn-white" onclick="goToRegister(event)">
+          📋 Register Your Firm
+        </a>
+        <a href="login.html" class="btn-outline-white">
+          🔐 Login to Portal
+        </a>
+      </div>
+      <p style="margin-top:1.2rem;font-size:0.82rem;color:rgba(255,255,255,0.5);">
+        NCB approval required · NDPS Act 1985 compliant ·
+        Documents verified in 3–5 working days
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer-grid">
+
+      <div>
+        <div class="footer-brand">
+          <img src="logo.png" alt="Logo" class="footer-logo" />
+          <span class="footer-name">ChemTrack India</span>
+        </div>
+        <p class="footer-desc">
+          End-to-end precursor chemical tracking system developed under the
+          National Chemical Authority initiative by the Narcotics Control Bureau,
+          Ministry of Home Affairs, Government of India.
+        </p>
+        <p class="footer-tagline">"Control the Chemical, Secure the Nation"</p>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">Portal</h4>
+        <ul class="footer-links">
+          <li><a href="login.html">Login</a></li>
+          <li><a href="#" onclick="goToRegister(event)">Register Firm</a></li>
+          <li><a href="admin-portal.html">NCB Admin Portal</a></li>
+          <li><a href="dashboard.html">My Dashboard</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">Register As</h4>
+        <ul class="footer-links">
+          <li><a href="#" onclick="goToRegister(event)">🏭 Manufacturer</a></li>
+          <li><a href="#" onclick="goToRegister(event)">🚚 Distributor</a></li>
+          <li><a href="#" onclick="goToRegister(event)">📦 Supplier</a></li>
+          <li><a href="#" onclick="goToRegister(event)">🏥 Consumer</a></li>
+          <li><a href="#" onclick="goToRegister(event)">🏪 Retailer</a></li>
+          <li><a href="#" onclick="goToRegister(event)">✈️ Exporter</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">Contact</h4>
+        <ul class="footer-links">
+          <li><a href="#">NCB Helpline</a></li>
+          <li><a href="#">Technical Support</a></li>
+          <li><a href="#">Report Violation</a></li>
+          <li><a href="#">ncb.gov.in</a></li>
+          <li><a href="#">NDPS Act 1985</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <p>
+        © 2026 ChemTrack India ·
+        <span>National Chemical Authority</span> ·
+        Ministry of Home Affairs · Government of India
+      </p>
+      <div class="gov-logos">
+        <span class="gov-tag">🇮🇳 Digital India Initiative</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCROLL TO TOP -->
+  <button class="scroll-top" aria-label="Scroll to top">↑</button>
+
+  <script src="landing.js"></script>
+
+  <script>
+    function goToRegister(e) {
+      if (e) e.preventDefault();
+      window.location.href = 'login.html?tab=register';
+    }
+
+    // Mobile hamburger menu
+    function toggleNav() {
+      const nav = document.getElementById('navLinks');
+      nav.classList.toggle('open');
+    }
+    function closeNav() {
+      document.getElementById('navLinks').classList.remove('open');
+    }
+    // Close nav on outside click
+    document.addEventListener('click', function(e) {
+      const nav = document.getElementById('navLinks');
+      const ham = document.getElementById('navHamburger');
+      if (nav.classList.contains('open') && !nav.contains(e.target) && !ham.contains(e.target)) {
+        nav.classList.remove('open');
+      }
+    });
+  </script>
+
+</body>
+</html>

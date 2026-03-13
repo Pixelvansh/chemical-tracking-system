@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NCB Admin Portal — ChemTrack India</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+
+<!-- SESSION CHECK -->
+<script>
+  const adminSession = localStorage.getItem('chemtrack_admin');
+  if (!adminSession) window.location.href = 'login.html';
+</script>
+
+<!-- NAVBAR -->
+<nav class="admin-navbar">
+  <div class="nav-left">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <img src="logo.png" class="nav-logo"/>
+    <div class="nav-title">
+      <span>ChemTrack India</span>
+      <span>NCB Admin Portal</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-badge">🔴 LIVE</div>
+    <div class="nav-admin-info">
+      <span class="nav-admin-name">NCB Officer</span>
+      <span class="nav-admin-role">Super Admin</span>
+    </div>
+    <button class="nav-logout" onclick="adminLogout()">Logout 🚪</button>
+  </div>
+</nav>
+
+<!-- TRICOLOR -->
+<div class="tricolor-bar">
+  <span></span><span></span><span></span>
+</div>
+
+<!-- LAYOUT -->
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+
+      <li>
+        <a href="#" class="sidebar-item active"
+           onclick="showSection('dashboard',this); return false;">
+          <span class="s-icon">📊</span>
+          <span class="s-text">Dashboard</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('approvals',this); return false;">
+          <span class="s-icon">✅</span>
+          <span class="s-text">Pending Approvals</span>
+          <span class="s-badge" id="badge-approvals"
+                style="display:none;">0</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('raw-requests',this); return false;">
+          <span class="s-icon">📦</span>
+          <span class="s-text">Raw Material Requests</span>
+          <span class="s-badge" id="badge-raw"
+                style="display:none;">0</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('companies',this); return false;">
+          <span class="s-icon">🏢</span>
+          <span class="s-text">All Companies</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('alerts',this); return false;">
+          <span class="s-icon">🚨</span>
+          <span class="s-text">Alerts</span>
+          <span class="s-badge red" id="badge-alerts">3</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('live-location',this); return false;">
+          <span class="s-icon">🗺️</span>
+          <span class="s-text">Live Location 📡</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('chain',this); return false;">
+          <span class="s-icon">🔗</span>
+          <span class="s-text">Chain Tracking</span>
+          <span class="s-badge" id="badge-chain" style="display:none">0</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('audit',this); return false;">
+          <span class="s-icon">🔗</span>
+          <span class="s-text">Audit Trail</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('reports',this); return false;">
+          <span class="s-icon">📄</span>
+          <span class="s-text">Reports</span>
+        </a>
+      </li>
+
+    </ul>
+
+    <div class="sidebar-footer">
+      <p>🇮🇳 Ministry of Home Affairs</p>
+      <p>Narcotics Control Bureau</p>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="admin-main">
+
+    <!-- ══════════════════════════════
+         DASHBOARD
+    ══════════════════════════════ -->
+    <div class="content-section active" id="section-dashboard">
+
+      <div class="section-header">
+        <h1>NCB Command Dashboard</h1>
+        <span class="live-badge">● LIVE</span>
+      </div>
+
+      <!-- AUTO REFRESH BAR -->
+      <div class="refresh-bar">
+        <div class="refresh-live">
+          <span class="refresh-dot"></span>
+          Auto-refreshing every 5 seconds
+        </div>
+        <span id="last-refresh" style="color:var(--gray);">
+          Updating...
+        </span>
+      </div>
+
+      <!-- SUMMARY CARDS -->
+      <div class="cards-grid">
+
+        <div class="summary-card blue">
+          <div class="card-icon">🏢</div>
+          <div class="card-info">
+            <span class="card-number" id="total-firms">0</span>
+            <span class="card-label">Total Registered Firms</span>
+          </div>
+        </div>
+
+        <div class="summary-card orange">
+          <div class="card-icon">⏳</div>
+          <div class="card-info">
+            <span class="card-number" id="pending-count">0</span>
+            <span class="card-label">Pending Approvals</span>
+          </div>
+        </div>
+
+        <div class="summary-card green">
+          <div class="card-icon">✅</div>
+          <div class="card-info">
+            <span class="card-number" id="approved-count">0</span>
+            <span class="card-label">Approved Firms</span>
+          </div>
+        </div>
+
+        <div class="summary-card red">
+          <div class="card-icon">❌</div>
+          <div class="card-info">
+            <span class="card-number" id="rejected-count">0</span>
+            <span class="card-label">Rejected Firms</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="qa-grid">
+          <button class="qa-btn orange"
+            onclick="showSection('approvals',
+              document.querySelector('[onclick*=approvals]'))">
+            ✅ Review Pending Approvals
+          </button>
+          <button class="qa-btn red"
+            onclick="showSection('alerts',
+              document.querySelector('[onclick*=alerts]'))">
+            🚨 View Active Alerts
+          </button>
+          <button class="qa-btn blue"
+            onclick="showSection('live-map',
+              document.querySelector('[onclick*=live-map]'))">
+            🗺️ Open Live Map
+          </button>
+          <button class="qa-btn green"
+            onclick="showSection('reports',
+              document.querySelector('[onclick*=reports]'))">
+            📄 Generate Report
+          </button>
+        </div>
+      </div>
+
+      <!-- RECENT REGISTRATIONS -->
+      <div class="table-section">
+        <div class="table-header">
+          <h3>Recent Registrations</h3>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Category</th>
+              <th>Email</th>
+              <th>Registered On</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="recent-tbody">
+            <tr>
+              <td colspan="6" class="empty-td">
+                No registrations yet
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         PENDING APPROVALS
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-approvals">
+
+      <div class="section-header">
+        <h1>Pending Firm Approvals</h1>
+        <span class="section-desc">
+          Review firm details and documents before approving
+        </span>
+      </div>
+
+      <!-- AUTO REFRESH BAR -->
+      <div class="refresh-bar">
+        <div class="refresh-live">
+          <span class="refresh-dot"></span>
+          Live — New requests appear automatically
+        </div>
+        <span id="last-refresh-approvals" style="color:var(--gray);">
+          Auto-updating...
+        </span>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <select class="filter-select"
+                onchange="filterApprovals(this.value)">
+          <option value="all">All Categories</option>
+          <option value="manufacturer">🏭 Manufacturer</option>
+          <option value="distributor">🚚 Distributor</option>
+          <option value="supplier">📦 Supplier</option>
+          <option value="consumer">🏥 Consumer</option>
+          <option value="retailer">🏪 Retailer</option>
+          <option value="exporter">✈️ Exporter</option>
+        </select>
+        <input type="text" class="filter-input"
+               placeholder="Search by email or company..."
+               oninput="searchApprovals(this.value)"/>
+      </div>
+
+      <!-- APPROVALS LIST — filled by JS -->
+      <div id="approvals-list">
+        <div class="empty-state">
+          <span>📭</span>
+          <p>No Pending Approvals</p>
+          <p style="font-size:0.82rem;color:var(--gray);">
+            New registrations will appear here automatically
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         RAW MATERIAL REQUESTS
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-raw-requests">
+
+      <div class="section-header">
+        <h1>Raw Material Requests</h1>
+        <span class="section-desc">
+          Manufacturers requesting chemical purchase approval
+        </span>
+      </div>
+
+      <div class="filter-bar">
+        <select class="filter-select">
+          <option>All Chemicals</option>
+          <option>Acetic Anhydride</option>
+          <option>Ephedrine</option>
+          <option>Pseudoephedrine</option>
+          <option>Potassium Permanganate</option>
+        </select>
+        <select class="filter-select">
+          <option>All Status</option>
+          <option>Pending</option>
+          <option>Approved</option>
+          <option>Rejected</option>
+        </select>
+      </div>
+
+      <div class="table-section">
+        <div class="table-header">
+          <h3>All Raw Material Requests</h3>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Firm</th>
+              <th>Chemical</th>
+              <th>Qty (kg)</th>
+              <th>Supplier</th>
+              <th>Purpose</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="9" class="empty-td">
+                No raw material requests yet
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         ALL COMPANIES
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-companies">
+
+      <div class="section-header">
+        <h1>All Registered Companies</h1>
+        <span class="section-desc">
+          Complete list of all firms in ChemTrack system
+        </span>
+      </div>
+
+      <div class="filter-bar">
+        <select class="filter-select">
+          <option>All Status</option>
+          <option>Approved</option>
+          <option>Pending</option>
+          <option>Rejected</option>
+          <option>Suspended</option>
+        </select>
+        <select class="filter-select">
+          <option>All Categories</option>
+          <option>Manufacturer</option>
+          <option>Distributor</option>
+          <option>Supplier</option>
+          <option>Consumer</option>
+          <option>Retailer</option>
+          <option>Exporter</option>
+        </select>
+        <input type="text" class="filter-input"
+               placeholder="Search company, email or URN..."/>
+      </div>
+
+      <div class="table-section">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Company</th>
+              <th>Category</th>
+              <th>Email</th>
+              <th>Registered On</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="companies-tbody">
+            <tr>
+              <td colspan="7" class="empty-td">
+                No companies registered yet
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         ALERTS
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-alerts">
+
+      <div class="section-header">
+        <h1>Active Alerts</h1>
+        <span class="section-desc">
+          Real-time chemical movement alerts requiring NCB action
+        </span>
+      </div>
+
+      <div class="alerts-list">
+
+        <div class="alert-card critical">
+          <div class="alert-left">
+            <span class="alert-type-icon">⚠️</span>
+            <div>
+              <p class="alert-title">Quantity Mismatch Detected</p>
+              <p class="alert-detail">
+                Batch CHEM001 — 400kg dispatched, 350kg received.
+                <strong style="color:var(--red)">50kg unaccounted.</strong>
+              </p>
+              <p class="alert-meta">
+                📍 Last GPS: Mumbai, Maharashtra &nbsp;·&nbsp;
+                🕐 2 hours ago &nbsp;·&nbsp;
+                🏭 XYZ Chemicals Pvt. Ltd.
+              </p>
+            </div>
+          </div>
+          <div class="alert-actions">
+            <span class="alert-badge critical">CRITICAL</span>
+            <button class="btn-investigate">Investigate</button>
+          </div>
+        </div>
+
+        <div class="alert-card warning">
+          <div class="alert-left">
+            <span class="alert-type-icon">🛑</span>
+            <div>
+              <p class="alert-title">Chemical Stuck in Transit</p>
+              <p class="alert-detail">
+                Batch CHEM003 — No scan for 14 hours.
+                Last location: Pune warehouse.
+              </p>
+              <p class="alert-meta">
+                📍 Last GPS: Pune, Maharashtra &nbsp;·&nbsp;
+                🕐 14 hours ago &nbsp;·&nbsp;
+                🚚 ABC Distributors
+              </p>
+            </div>
+          </div>
+          <div class="alert-actions">
+            <span class="alert-badge warning">WARNING</span>
+            <button class="btn-investigate">Investigate</button>
+          </div>
+        </div>
+
+        <div class="alert-card warning">
+          <div class="alert-left">
+            <span class="alert-type-icon">📊</span>
+            <div>
+              <p class="alert-title">Overconsumption Alert</p>
+              <p class="alert-detail">
+                Apollo Hospital — Used 800kg this month vs
+                avg 100kg. <strong>8x above normal.</strong>
+              </p>
+              <p class="alert-meta">
+                📍 New Delhi &nbsp;·&nbsp;
+                🕐 Today 09:30 AM &nbsp;·&nbsp;
+                🏥 Apollo Hospital Ltd.
+              </p>
+            </div>
+          </div>
+          <div class="alert-actions">
+            <span class="alert-badge warning">WARNING</span>
+            <button class="btn-investigate">Investigate</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         LIVE MAP
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-live-map">
+
+      <div class="section-header">
+        <h1>Live Chemical Tracking Map</h1>
+        <span class="section-desc">
+          Real-time GPS locations of all active chemical shipments
+        </span>
+      </div>
+
+      <div class="map-legend">
+        <span class="legend-item">
+          <span class="dot green"></span> Normal
+        </span>
+        <span class="legend-item">
+          <span class="dot orange"></span> Delayed
+        </span>
+        <span class="legend-item">
+          <span class="dot red"></span> Alert
+        </span>
+        <span class="legend-item">
+          <span class="dot blue"></span> Delivered
+        </span>
+      </div>
+
+      <div class="map-placeholder">
+        <div class="map-inner">
+          <span style="font-size:4rem;">🗺️</span>
+          <p style="font-size:1.2rem;font-weight:700;
+                    color:var(--navy);margin:1rem 0 0.5rem;">
+            Live India Map
+          </p>
+          <p style="color:var(--gray);font-size:0.88rem;
+                    line-height:1.6;max-width:400px;">
+            Integrate Google Maps API or Leaflet.js + OpenStreetMap.<br/>
+            Add your API key in <code>js/admin.js</code> to enable
+            real-time GPS tracking dots.
+          </p>
+          <div class="map-stats">
+            <div class="map-stat">
+              <span style="color:var(--green);font-weight:700;
+                           font-size:1.8rem;">12</span>
+              <span style="font-size:0.78rem;color:var(--gray);">
+                Active Shipments
+              </span>
+            </div>
+            <div class="map-stat">
+              <span style="color:var(--orange);font-weight:700;
+                           font-size:1.8rem;">3</span>
+              <span style="font-size:0.78rem;color:var(--gray);">
+                Delayed
+              </span>
+            </div>
+            <div class="map-stat">
+              <span style="color:var(--red);font-weight:700;
+                           font-size:1.8rem;">1</span>
+              <span style="font-size:0.78rem;color:var(--gray);">
+                Alert
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         AUDIT TRAIL
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-audit">
+
+      <div class="section-header">
+        <h1>Blockchain Audit Trail</h1>
+        <span class="section-desc">
+          Immutable record of every chemical transaction
+        </span>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" class="filter-input"
+               placeholder="Enter Batch ID to trace (e.g. CHEM001)..."/>
+        <button class="btn-search">🔍 Trace Batch</button>
+      </div>
+
+      <div class="blockchain-chain">
+
+        <div class="block-card">
+          <div class="block-header">
+            🔗 Block #1 — Genesis
+          </div>
+          <div class="block-body">
+            <p><strong>Event:</strong> Batch Created</p>
+            <p><strong>Batch ID:</strong> CHEM001</p>
+            <p><strong>Chemical:</strong> Acetic Anhydride</p>
+            <p><strong>Quantity:</strong> 500 kg</p>
+            <p><strong>By:</strong> XYZ Chemicals Pvt. Ltd., Pune</p>
+            <p><strong>GPS:</strong> 18.5204° N, 73.8567° E</p>
+            <p><strong>Time:</strong> 20/02/2026 — 09:00 AM</p>
+            <p class="block-hash">
+              Hash: A3F9B2C1D4E5F678...
+            </p>
+          </div>
+          <div class="block-arrow">↓</div>
+        </div>
+
+        <div class="block-card">
+          <div class="block-header">
+            🔗 Block #2 — Dispatch
+          </div>
+          <div class="block-body">
+            <p><strong>Event:</strong> Dispatched to Distributor</p>
+            <p><strong>To:</strong> ABC Distributors, Mumbai</p>
+            <p><strong>Quantity:</strong> 500 kg</p>
+            <p><strong>Vehicle:</strong> MH 12 AB 3456</p>
+            <p><strong>GPS:</strong> 18.5204° N, 73.8567° E</p>
+            <p><strong>Time:</strong> 20/02/2026 — 10:30 AM</p>
+            <p class="block-hash">
+              Hash: B7K2M4N8P9Q1R2S3... &nbsp;|&nbsp;
+              Prev: A3F9B2C1...
+            </p>
+          </div>
+          <div class="block-arrow">↓</div>
+        </div>
+
+        <div class="block-card alert-block">
+          <div class="block-header">
+            🔗 Block #3 — Receipt ⚠️ MISMATCH
+          </div>
+          <div class="block-body">
+            <p><strong>Event:</strong> Received by Distributor</p>
+            <p><strong>By:</strong> ABC Distributors, Mumbai</p>
+            <p>
+              <strong>Dispatched:</strong> 500 kg &nbsp;|&nbsp;
+              <strong style="color:var(--red)">
+                Received: 450 kg
+              </strong>
+            </p>
+            <p>
+              <strong>Missing:</strong>
+              <span style="color:var(--red);font-weight:700;">
+                50 kg ❌ — NCB Alert Raised
+              </span>
+            </p>
+            <p><strong>GPS:</strong> 19.0760° N, 72.8777° E</p>
+            <p><strong>Time:</strong> 20/02/2026 — 02:00 PM</p>
+            <p class="block-hash">
+              Hash: C9M1X3Y7Z2A4B6C8... &nbsp;|&nbsp;
+              Prev: B7K2M4N8...
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         REPORTS
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-reports">
+
+      <div class="section-header">
+        <h1>Reports & Analytics</h1>
+        <span class="section-desc">
+          Auto-generated compliance and movement reports
+        </span>
+      </div>
+
+      <div class="reports-grid">
+
+        <div class="report-card">
+          <span class="report-icon">📊</span>
+          <h3>Monthly Movement Report</h3>
+          <p>
+            Chemical movement summary for current month
+            across all registered firms
+          </p>
+          <button class="btn-report"
+            onclick="showToast('📄 Generating PDF...','info')">
+            Generate PDF
+          </button>
+        </div>
+
+        <div class="report-card">
+          <span class="report-icon">📋</span>
+          <h3>Quarterly Compliance Report</h3>
+          <p>
+            NCB mandatory quarterly report for all
+            registered and active firms
+          </p>
+          <button class="btn-report"
+            onclick="showToast('📄 Generating PDF...','info')">
+            Generate PDF
+          </button>
+        </div>
+
+        <div class="report-card">
+          <span class="report-icon">🚨</span>
+          <h3>Alerts Summary Report</h3>
+          <p>
+            All alerts raised, investigated and resolved
+            this month with action taken log
+          </p>
+          <button class="btn-report"
+            onclick="showToast('📄 Generating PDF...','info')">
+            Generate PDF
+          </button>
+        </div>
+
+        <div class="report-card">
+          <span class="report-icon">🏢</span>
+          <h3>Firm Registration Report</h3>
+          <p>
+            All registered, approved, rejected firms
+            with state-wise and category-wise breakdown
+          </p>
+          <button class="btn-report"
+            onclick="showToast('📄 Generating PDF...','info')">
+            Generate PDF
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- CHAIN TRACKING SECTION -->
+    <div class="content-section" id="section-chain">
+      <div class="section-header">
+        <h2>🔗 Barcode Chain Tracking</h2>
+        <p>Full supply chain from Supplier → Manufacturer → Distributor → Retailer</p>
+      </div>
+      <div class="section-card" style="margin-bottom:1rem">
+        <h3>Scan / Search Barcode</h3>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+          <input type="text" id="admin-scan-input" class="form-input" style="flex:1;max-width:400px" placeholder="Enter any barcode ID..."/>
+          <button class="btn-approve" onclick="adminScanBarcode()">🔍 Search</button>
+          <button class="btn-reject" onclick="adminLoadAllChain()">📋 Load All</button>
+        </div>
+        <div id="admin-scan-result"></div>
+      </div>
+      <div class="section-card">
+        <h3>GPS Location Map — Live Tracking (Simulated)</h3>
+        <div id="admin-gps-map" style="background:#1a2a3a;border-radius:12px;padding:1.5rem;color:#e0e8f4;min-height:200px">
+          <p style="text-align:center;color:#888;padding:2rem">Click "Load All" to see live GPS map of all shipments</p>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:1rem">
+        <h3>All Chain Entries</h3>
+        <table class="data-table" id="chain-full-table">
+          <thead>
+            <tr>
+              <th>Barcode ID</th><th>Level</th><th>Material</th><th>Qty</th><th>Remaining</th>
+              <th>From</th><th>To</th><th>GPS Origin</th><th>Status</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="chain-tbody"><tr><td colspan="10" class="empty-td">Load chain data to view.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- LIVE LOCATION SECTION -->
+    <div class="content-section" id="section-live-location">
+      <div class="section-header">
+        <h2>📡 Live Location Tracking</h2>
+        <p>Supplier / Manufacturer / Distributor ka real-time GPS location</p>
+      </div>
+      <div class="section-card">
+        <div class="live-location-header">
+          <h3>Online Users</h3>
+          <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+            <span class="live-badge" id="live-location-count">0 online</span>
+            <span class="live-refresh-label" id="live-location-refresh">Updated: —</span>
+            <button class="btn-approve" onclick="renderLiveLocations()">🔄 Refresh Now</button>
+          </div>
+        </div>
+        <div class="live-cards-grid" id="live-location-panel">
+          <div class="live-empty">
+            <span style="font-size:2.5rem">📡</span>
+            <p>Koi bhi user abhi online nahi hai.</p>
+            <p style="font-size:0.8rem;color:#888">Jab supplier/manufacturer/distributor apna dashboard kholenga aur location allow karega, unki live GPS yahan aayegi.</p>
+          </div>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:1rem">
+        <h3>ℹ️ Kaise kaam karta hai?</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-top:0.5rem">
+          <div style="background:#f0f7ff;border-radius:10px;padding:1rem">
+            <strong style="color:#132C54">Step 1</strong>
+            <p style="font-size:0.83rem;margin:0.4rem 0 0;color:#555">User apna dashboard (Supplier/Manufacturer/Distributor) kholega</p>
+          </div>
+          <div style="background:#f0f7ff;border-radius:10px;padding:1rem">
+            <strong style="color:#132C54">Step 2</strong>
+            <p style="font-size:0.83rem;margin:0.4rem 0 0;color:#555">Browser location permission maangega — user "Allow" karega</p>
+          </div>
+          <div style="background:#f0f7ff;border-radius:10px;padding:1rem">
+            <strong style="color:#132C54">Step 3</strong>
+            <p style="font-size:0.83rem;margin:0.4rem 0 0;color:#555">Har 10 seconds mein GPS automatically update hota rahega</p>
+          </div>
+          <div style="background:#f0f7ff;border-radius:10px;padding:1rem">
+            <strong style="color:#132C54">Step 4</strong>
+            <p style="font-size:0.83rem;margin:0.4rem 0 0;color:#555">Admin portal yahan live coordinates + Google Maps link dikhata hai</p>
+          </div>
+        </div>
+        <div style="margin-top:1rem;background:#fff3cd;border-radius:8px;padding:0.8rem 1rem;font-size:0.82rem;color:#856404">
+          ⚠️ <strong>Note:</strong> Yeh same device/browser pe kaam karta hai (localStorage based). Alag device ka live tracking Firebase chahiye.
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════════════════════════
+     APPROVE MODAL
+══════════════════════════════ -->
+<div class="modal-overlay" id="approve-modal">
+  <div class="modal">
+
+    <div class="modal-header green">
+      <h3>✅ Approve Firm Registration</h3>
+      <button onclick="closeModal('approve-modal')">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- USER INFO PREVIEW -->
+      <div class="modal-user-info">
+        <p>
+          <strong>Company:</strong>
+          <span id="modal-approve-name">—</span>
+        </p>
+        <p>
+          <strong>Category:</strong>
+          <span id="modal-approve-cat">—</span>
+        </p>
+        <p>
+          <strong>Email:</strong>
+          <span id="modal-approve-email">—</span>
+        </p>
+      </div>
+
+      <p>
+        Are you sure you want to <strong>APPROVE</strong> this firm?
+      </p>
+      <p style="font-size:0.83rem;color:var(--gray);margin-top:0.5rem;
+                line-height:1.5;">
+        Once approved, the firm will be able to login and access their
+        role-based dashboard. This action is logged on blockchain and
+        cannot be reversed without NCB authorization.
+      </p>
+
+      <div class="form-group" style="margin-top:1rem;">
+        <label class="form-label">Approval Note (Optional)</label>
+        <input type="text" class="form-input" id="approve-note"
+               placeholder="e.g. Documents verified, URN confirmed"/>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-cancel"
+              onclick="closeModal('approve-modal')">
+        Cancel
+      </button>
+      <button class="btn-modal-confirm green"
+              onclick="confirmApprove()">
+        ✅ Confirm Approve
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     REJECT MODAL
+══════════════════════════════ -->
+<div class="modal-overlay" id="reject-modal">
+  <div class="modal">
+
+    <div class="modal-header red">
+      <h3>❌ Reject Firm Registration</h3>
+      <button onclick="closeModal('reject-modal')">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="modal-user-info">
+        <p>
+          <strong>Company:</strong>
+          <span id="modal-reject-name">—</span>
+        </p>
+      </div>
+
+      <p>
+        Are you sure you want to <strong>REJECT</strong> this firm?
+      </p>
+      <p style="font-size:0.83rem;color:var(--gray);margin-top:0.3rem;">
+        The firm will be notified with the reason on their next
+        login attempt.
+      </p>
+
+      <div class="form-group" style="margin-top:1rem;">
+        <label class="form-label">
+          Reason for Rejection
+          <span style="color:var(--red)">*</span>
+        </label>
+        <select class="form-input" id="reject-reason">
+          <option value="">Select reason</option>
+          <option>Documents incomplete or invalid</option>
+          <option>URN number mismatch</option>
+          <option>GST details mismatch</option>
+          <option>Suspicious activity detected</option>
+          <option>Duplicate registration attempt</option>
+          <option>License expired or invalid</option>
+          <option>Company not found in government records</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Additional Details</label>
+        <input type="text" class="form-input" id="reject-detail"
+               placeholder="Specify details for the firm..."/>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-cancel"
+              onclick="closeModal('reject-modal')">
+        Cancel
+      </button>
+      <button class="btn-modal-confirm red"
+              onclick="confirmReject()">
+        ❌ Confirm Reject
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<link rel="stylesheet" href="manufacturer.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="barcode-engine.js"></script>
+<script src="admin.js?v=9"></script>
+<script>
+// OVERRIDE — browser cache fix
+function openApproveModal(email) {
+  var users = JSON.parse(localStorage.getItem("chemtrack_users") || "[]");
+  var u = null;
+  for (var i = 0; i < users.length; i++) {
+    if (users[i] && users[i].email && users[i].email.trim().toLowerCase() === (email||"").trim().toLowerCase()) {
+      u = users[i]; break;
+    }
+  }
+  if (!u) { alert("User not found: " + email); return; }
+  var role = u.role || u.category || "unknown";
+  currentApproveEmail = email;
+  var el1 = document.getElementById("modal-approve-name");
+  var el2 = document.getElementById("modal-approve-cat");
+  var el3 = document.getElementById("modal-approve-email");
+  if (el1) el1.textContent = u.companyName || u.name || "—";
+  if (el2) el2.textContent = role.toUpperCase();
+  if (el3) el3.textContent = u.email;
+  var noteEl = document.getElementById("approve-note"); if (noteEl) noteEl.value = "";
+  document.getElementById("approve-modal").classList.add("show");
+}
+</script>
+</body>
+</html>

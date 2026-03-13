@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Retailer Dashboard — ChemTrack India</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="retailer.css"/>
+</head>
+<body>
+<script>
+  const _sess = localStorage.getItem('chemtrack_session');
+  if (!_sess) { window.location.href = 'login.html'; }
+  else {
+    const _s = JSON.parse(_sess);
+    if (_s.role !== 'retailer' || _s.status !== 'approved') window.location.href = 'login.html';
+  }
+</script>
+
+<nav class="dash-navbar">
+  <div class="nav-left">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <img src="logo.png" class="nav-logo"/>
+    <div class="nav-title"><span>ChemTrack India</span><span>Retailer Portal</span></div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info">
+      <span class="nav-user-name" id="nav-company-name">Loading...</span>
+      <span class="nav-user-role">🏪 Retailer</span>
+    </div>
+    <button class="nav-logout" onclick="retailerLogout()">Logout 🚪</button>
+  </div>
+</nav>
+<div class="tricolor-bar"><span></span><span></span><span></span></div>
+
+<div class="dash-layout">
+  <aside class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+      <li><a href="#" class="sidebar-item active" onclick="showSection('dashboard',this);return false;"><span class="s-icon">📊</span><span class="s-text">Dashboard</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('order-dist',this);return false;"><span class="s-icon">📝</span><span class="s-text">Order from Distributor</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('consumer-orders',this);return false;"><span class="s-icon">🛒</span><span class="s-text">Consumer Orders</span><span class="s-badge" id="badge-consumer-orders" style="display:none">0</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('receive',this);return false;"><span class="s-icon">📥</span><span class="s-text">Receive Stock</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('dispatch-consumer',this);return false;"><span class="s-icon">🚚</span><span class="s-text">Dispatch to Consumer</span><span class="s-badge" id="badge-dispatch" style="display:none">!</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('stock',this);return false;"><span class="s-icon">📦</span><span class="s-text">Current Stock</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('history',this);return false;"><span class="s-icon">📜</span><span class="s-text">History</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('compliance',this);return false;"><span class="s-icon">✅</span><span class="s-text">Compliance</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('profile',this);return false;"><span class="s-icon">🏢</span><span class="s-text">My Profile</span></a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>🇮🇳 NCB Approved Retailer</p>
+      <p id="sidebar-urn">URN: Loading...</p>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+
+    <!-- DASHBOARD -->
+    <div class="content-section active" id="section-dashboard">
+      <div class="section-header">
+        <div><h1 id="welcome-msg">Welcome, Retailer</h1><p class="section-desc" id="welcome-sub">NCB Approved — Retailer Portal</p></div>
+        <span class="approved-badge">✅ NCB APPROVED</span>
+      </div>
+      <div class="cards-grid">
+        <div class="summary-card purple"><div class="card-icon">📦</div><div class="card-info"><span class="card-number" id="stat-stock">0</span><span class="card-label">Total Stock (kg)</span></div></div>
+        <div class="summary-card green"><div class="card-icon">📥</div><div class="card-info"><span class="card-number" id="stat-received">0</span><span class="card-label">Total Received</span></div></div>
+        <div class="summary-card orange"><div class="card-icon">🛒</div><div class="card-info"><span class="card-number" id="stat-qr">0</span><span class="card-label">QR Verified Receipts</span></div></div>
+        <div class="summary-card navy"><div class="card-icon">✅</div><div class="card-info"><span class="card-number" id="stat-compliance">100%</span><span class="card-label">Compliance Score</span></div></div>
+      </div>
+      <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="qa-grid">
+          <button class="qa-btn purple" onclick="showSection('order-dist',this)">📝 Order from Distributor</button>
+          <button class="qa-btn green" onclick="showSection('consumer-orders',this)">🛒 Consumer Orders</button>
+          <button class="qa-btn orange" onclick="showSection('receive',this)">📥 Receive Stock</button>
+          <button class="qa-btn navy" onclick="showSection('stock',this)">📦 View Stock</button>
+        </div>
+      </div>
+      <div class="table-section">
+        <div class="table-header"><h3>Recent Stock Receipts</h3></div>
+        <table class="data-table">
+          <thead><tr><th>Receipt ID</th><th>Material</th><th>Quantity</th><th>From Distributor</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="recent-tbody"><tr><td colspan="6" class="empty-td">No receipts yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ORDER FROM DISTRIBUTOR (NAYA) -->
+    <div class="content-section" id="section-order-dist">
+      <div class="section-header"><div><h1>📝 Order from Distributor</h1><p class="section-desc">Request chemicals from NCB-approved distributors</p></div></div>
+      <div class="form-card">
+        <h3 class="form-card-title">📋 New Order Request</h3>
+        <div class="alert" id="dist-req-alert"></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Material Name <span class="req">*</span></label><input type="text" id="dist-req-material" class="form-input" placeholder="e.g. Acetic Acid"/></div>
+          <div class="form-group"><label>Quantity (kg) <span class="req">*</span></label><input type="number" id="dist-req-qty" class="form-input" placeholder="e.g. 50"/></div>
+          <div class="form-group"><label>Chemical Components</label><input type="text" id="dist-req-chemicals" class="form-input" placeholder="e.g. CH3COOH 99%"/></div>
+          <div class="form-group"><label>Distributor Name <span class="req">*</span></label><input type="text" id="dist-req-dist-name" class="form-input" placeholder="Distributor company name"/></div>
+          <div class="form-group"><label>Distributor Email</label><input type="email" id="dist-req-dist-email" class="form-input" placeholder="distributor@example.com"/></div>
+          <div class="form-group full-span"><label>Notes</label><textarea id="dist-req-notes" class="form-input" rows="2" placeholder="Any special requirements..."></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="submitDistributorRequest()">📤 Send Order to Distributor</button>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:1.5rem">
+        <h3 class="form-card-title">📜 My Sent Orders</h3>
+        <table class="data-table">
+          <thead><tr><th>Request ID</th><th>Distributor</th><th>Material</th><th>Qty</th><th>Status</th><th>Barcode</th><th>Date</th></tr></thead>
+          <tbody id="my-dist-requests-tbody"><tr><td colspan="7" class="empty-td">No orders sent yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CONSUMER ORDERS (NAYA) -->
+    <div class="content-section" id="section-consumer-orders">
+      <div class="section-header"><div><h1>🛒 Consumer Orders</h1><p class="section-desc">Orders from consumers — accept or reject</p></div></div>
+      <div class="form-card">
+        <div class="alert" id="consumer-order-alert"></div>
+        <h3 class="form-card-title">📋 Pending & Accepted Consumer Orders</h3>
+        <table class="data-table">
+          <thead><tr><th>Request ID</th><th>Consumer</th><th>Material</th><th>Qty</th><th>Purpose/Notes</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="consumer-orders-tbody"><tr><td colspan="7" class="empty-td">No orders from consumers yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RECEIVE STOCK (barcode scan — NAYA) -->
+    <div class="content-section" id="section-receive">
+      <div class="section-header"><div><h1>📥 Receive Stock</h1><p class="section-desc">Scan barcode from distributor to confirm receipt on blockchain</p></div></div>
+      <div class="form-card">
+        <h3 class="form-card-title">🔍 Enter / Scan Barcode ID from Distributor</h3>
+        <div class="alert" id="receive-alert"></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Barcode ID <span class="req">*</span></label>
+            <div class="input-with-btn">
+              <input type="text" id="receive-barcode-id" class="form-input" placeholder="DST-XXXX-XXXXX (from distributor)"/>
+              <button class="btn-secondary" onclick="verifyRetailerReceive()">🔍 Verify</button>
+            </div>
+          </div>
+        </div>
+        <div id="retailer-verify-result"></div>
+        <div id="retailer-confirm-form" style="display:none">
+          <div class="form-grid" style="margin-top:1rem">
+            <div class="form-group"><label>Received At City</label>
+              <select id="retailer-receive-city" class="form-input"><option value="">-- Select City --</option></select>
+            </div>
+            <div class="form-group"><label>Received By</label><input type="text" id="retailer-receive-by" class="form-input" placeholder="Name"/></div>
+          </div>
+          <button class="btn-primary" onclick="confirmRetailerReceive()">✅ Confirm Receipt — Update Blockchain</button>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:1.5rem">
+        <h3 class="form-card-title">📦 All Received Stock</h3>
+        <table class="data-table">
+          <thead><tr><th>Receipt ID</th><th>Material</th><th>Qty</th><th>From Distributor</th><th>Barcode ID</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="recent-tbody-receive">
+            <tr><td colspan="7" class="empty-td">No receipts yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CURRENT STOCK -->
+    <div class="content-section" id="section-stock">
+      <div class="section-header"><h1>📦 Current Stock</h1><span class="section-desc">Your current chemical inventory</span></div>
+      <div class="table-section">
+        <div class="table-header"><h3>Stock Inventory</h3><span style="font-size:0.82rem;color:var(--gray)">NCB can audit anytime</span></div>
+        <table class="data-table">
+          <thead><tr><th>#</th><th>Chemical Name</th><th>Available (kg)</th><th>Received From</th><th>Last Updated</th><th>Status</th></tr></thead>
+          <tbody id="stock-tbody"><tr><td colspan="6" class="empty-td">No stock available.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="content-section" id="section-history">
+      <div class="section-header"><h1>📜 History</h1><span class="section-desc">All orders, receipts and requests</span></div>
+      <div class="table-section">
+        <table class="data-table">
+          <thead><tr><th>#</th><th>ID</th><th>Type</th><th>Material</th><th>Qty</th><th>Party</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="history-tbody"><tr><td colspan="8" class="empty-td">No history yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COMPLIANCE -->
+    <div class="content-section" id="section-compliance">
+      <div class="section-header"><h1>✅ Compliance Status</h1><span class="section-desc">NCB compliance overview</span></div>
+      <div class="compliance-grid">
+        <div class="compliance-card green"><div class="comp-icon">✅</div><div class="comp-info"><span class="comp-title">Registration Status</span><span class="comp-value green-text">NCB APPROVED</span></div></div>
+        <div class="compliance-card green"><div class="comp-icon">📄</div><div class="comp-info"><span class="comp-title">Retail License</span><span class="comp-value green-text">VALID</span></div></div>
+        <div class="compliance-card orange"><div class="comp-icon">📊</div><div class="comp-info"><span class="comp-title">Compliance Score</span><span class="comp-value orange-text" id="comp-score">100%</span></div></div>
+        <div class="compliance-card blue"><div class="comp-icon">🔗</div><div class="comp-info"><span class="comp-title">Blockchain Records</span><span class="comp-value blue-text" id="comp-records">0 entries</span></div></div>
+      </div>
+      <div class="compliance-rules">
+        <h3>NCB Compliance Rules for Retailers</h3>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>All stock must be received only from NCB-approved distributors</span></div>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>Barcode must be scanned on every stock receipt — blockchain recorded</span></div>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>NCB can audit stock levels at any time without prior notice</span></div>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>Consumer orders must be fulfilled only from verified stock</span></div>
+        <div class="rule-item"><span class="rule-icon orange-text">⚠️</span><span>Monthly stock report submission to NCB is mandatory</span></div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="content-section" id="section-profile">
+      <div class="section-header"><h1>🏢 My Profile</h1></div>
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="profile-avatar">🏪</div>
+          <div><h2 id="prof-company">—</h2><span class="cat-badge">🏪 Retailer</span><span class="status-badge approved" style="margin-left:8px">✅ APPROVED</span></div>
+        </div>
+        <div class="profile-grid">
+          <div class="profile-field"><label>📧 Email</label><span id="prof-email">—</span></div>
+          <div class="profile-field"><label>📞 Phone</label><span id="prof-phone">—</span></div>
+          <div class="profile-field"><label>🏢 Company</label><span id="prof-company2">—</span></div>
+          <div class="profile-field"><label>👤 Owner</label><span id="prof-owner">—</span></div>
+          <div class="profile-field"><label>💼 Designation</label><span id="prof-designation">—</span></div>
+          <div class="profile-field"><label>📍 State</label><span id="prof-state">—</span></div>
+          <div class="profile-field"><label>🏙️ City</label><span id="prof-city">—</span></div>
+          <div class="profile-field"><label>🪪 GST</label><span id="prof-gst">—</span></div>
+          <div class="profile-field"><label>🏛️ URN</label><span id="prof-urn">—</span></div>
+          <div class="profile-field"><label>📋 PAN</label><span id="prof-pan">—</span></div>
+          <div class="profile-field"><label>📜 Retail License</label><span id="prof-retail-license">—</span></div>
+          <div class="profile-field"><label>📅 Registered</label><span id="prof-registered">—</span></div>
+          <div class="profile-field"><label>✅ Approved</label><span id="prof-approved">—</span></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- DISPATCH TO CONSUMER -->
+    <div class="content-section" id="section-dispatch-consumer">
+      <div class="section-header"><div><h1>🚚 Dispatch to Consumer</h1><p class="section-desc">Accepted consumer orders — generate RET barcode and dispatch</p></div></div>
+      <div class="form-card">
+        <div class="alert" id="dispatch-consumer-alert"></div>
+        <h3 class="form-card-title">📦 Accepted Orders Ready to Dispatch</h3>
+        <table class="data-table">
+          <thead><tr><th>Request ID</th><th>Consumer</th><th>Chemical</th><th>Qty</th><th>Purpose</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody id="dispatch-consumer-tbody"><tr><td colspan="7" class="empty-td">No accepted orders to dispatch.</td></tr></tbody>
+        </table>
+      </div>
+      <div class="form-card" id="dispatch-barcode-box" style="display:none;margin-top:1rem">
+        <h3 class="form-card-title">✅ Barcode Generated — Consumer ko do yeh ID</h3>
+        <div style="background:#e8f5e9;border:2px dashed #4caf50;border-radius:8px;padding:20px;text-align:center">
+          <p style="margin:0 0 8px;color:#555">Consumer → Receive Chemical → Paste karo:</p>
+          <code id="generated-ret-barcode" style="font-size:1.6rem;font-weight:bold;letter-spacing:3px;color:#1a1a1a;user-select:all"></code>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="barcode-engine.js"></script>
+<script src="retailer.js"></script>
+</body>
+</html>

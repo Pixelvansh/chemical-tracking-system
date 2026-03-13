@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manufacturer Dashboard — ChemTrack India</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="supplier.css"/>
+  <link rel="stylesheet" href="manufacturer.css"/>
+</head>
+<body>
+<script>
+  const _sess = localStorage.getItem('chemtrack_session');
+  if (!_sess) { window.location.href = 'login.html'; }
+  else {
+    const _s = JSON.parse(_sess);
+    if (_s.role !== 'manufacturer' || _s.status !== 'approved') window.location.href = 'login.html';
+  }
+</script>
+
+<nav class="dash-navbar">
+  <div class="nav-left">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <img src="logo.png" class="nav-logo"/>
+    <div class="nav-title"><span>ChemTrack India</span><span>Manufacturer Portal</span></div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info">
+      <span class="nav-user-name" id="nav-company-name">Loading...</span>
+      <span class="nav-user-role">🏭 Manufacturer</span>
+    </div>
+    <button class="nav-logout" onclick="mfrLogout()">Logout 🚪</button>
+  </div>
+</nav>
+<div class="tricolor-bar"><span></span><span></span><span></span></div>
+
+<div class="dash-layout">
+  <aside class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+      <li><a href="#" class="sidebar-item active" onclick="showSection('dashboard',this);return false;"><span class="s-icon">📊</span><span class="s-text">Dashboard</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('dist-orders',this);return false;"><span class="s-icon">🛒</span><span class="s-text">Distributor Orders</span><span class="s-badge" id="badge-dist-orders" style="display:none">0</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('request-raw',this);return false;"><span class="s-icon">📥</span><span class="s-text">Request Raw Material</span><span class="s-badge" id="badge-pending" style="display:none">0</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('received',this);return false;"><span class="s-icon">✅</span><span class="s-text">Received Raw</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('manufacture',this);return false;"><span class="s-icon">⚗️</span><span class="s-text">Manufacture & Dispatch</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('qr',this);return false;"><span class="s-icon">🔲</span><span class="s-text">QR Manager</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('scan',this);return false;"><span class="s-icon">📷</span><span class="s-text">Scan Barcode</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('history',this);return false;"><span class="s-icon">📜</span><span class="s-text">History</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('profile',this);return false;"><span class="s-icon">🏢</span><span class="s-text">My Profile</span></a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>🇮🇳 NCB Approved</p>
+      <p id="sidebar-urn">URN: Loading...</p>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+
+    <!-- DASHBOARD -->
+    <div class="content-section active" id="section-dashboard">
+      <div class="section-header">
+        <h2 id="welcome-msg">Welcome</h2>
+        <p id="welcome-sub">NCB Approved Manufacturer</p>
+      </div>
+      <div class="cards-grid">
+        <div class="summary-card orange">
+          <div class="card-icon">🛒</div>
+          <div class="card-info"><span class="card-number" id="stat-raw-pending">0</span><span class="card-label">Distributor Orders</span></div>
+        </div>
+        <div class="summary-card green">
+          <div class="card-icon">✅</div>
+          <div class="card-info"><span class="card-number" id="stat-raw-received">0</span><span class="card-label">Raw Batches Received</span></div>
+        </div>
+        <div class="summary-card blue">
+          <div class="card-icon">⚗️</div>
+          <div class="card-info"><span class="card-number" id="stat-manufactured">0</span><span class="card-label">Batches Manufactured</span></div>
+        </div>
+        <div class="summary-card navy">
+          <div class="card-icon">🚚</div>
+          <div class="card-info"><span class="card-number" id="stat-dispatched">0</span><span class="card-label">Dispatched to Distributor</span></div>
+        </div>
+      </div>
+      <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="action-btns">
+          <button class="action-btn" onclick="showSection('dist-orders',this)"><span>🛒</span><span>Distributor Orders</span></button>
+          <button class="action-btn" onclick="showSection('received',this)"><span>✅</span><span>Receive Shipment</span></button>
+          <button class="action-btn" onclick="showSection('manufacture',this)"><span>⚗️</span><span>Manufacture & Dispatch</span></button>
+          <button class="action-btn" onclick="showSection('qr',this)"><span>🔲</span><span>QR Manager</span></button>
+        </div>
+      </div>
+      <div class="table-section">
+        <div class="table-header"><h3>Recent Activity</h3></div>
+        <table class="data-table">
+          <thead><tr><th>ID</th><th>Type</th><th>Material</th><th>Qty</th><th>Party</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="recent-tbody"><tr><td colspan="7" class="empty-td">No activity yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DISTRIBUTOR ORDERS (NAYA) -->
+    <div class="content-section" id="section-dist-orders">
+      <div class="section-header"><div><h1>🛒 Distributor Orders</h1><p class="section-desc">Orders received from distributors — accept, reject, or fulfill</p></div></div>
+      <div class="form-card">
+        <div class="alert" id="dist-order-alert"></div>
+        <h3 class="form-card-title">📋 Pending & Accepted Orders</h3>
+        <table class="data-table">
+          <thead><tr><th>Request ID</th><th>Distributor</th><th>Material</th><th>Qty</th><th>Notes</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody id="dist-orders-tbody"><tr><td colspan="7" class="empty-td">No orders from distributors yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REQUEST RAW MATERIAL -->
+    <div class="content-section" id="section-request-raw">
+      <div class="section-header"><div><h1>📥 Request Raw Material</h1><p class="section-desc">Submit raw material requests to NCB-approved suppliers</p></div></div>
+      <div class="form-card">
+        <h3 class="form-card-title">📋 New Raw Material Request</h3>
+        <div class="alert" id="req-alert"></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Material Name <span class="req">*</span></label><input type="text" id="req-material" class="form-input" placeholder="e.g. Acetic Acid Glacial"/></div>
+          <div class="form-group"><label>Quantity (kg) <span class="req">*</span></label><input type="number" id="req-qty" class="form-input" placeholder="e.g. 500"/></div>
+          <div class="form-group"><label>Chemical Components <span class="req">*</span></label><input type="text" id="req-chemicals" class="form-input" placeholder="e.g. CH3COOH — 99.5% pure"/></div>
+          <div class="form-group"><label>Supplier Name <span class="req">*</span></label><input type="text" id="req-supplier" class="form-input" placeholder="Supplier company name"/></div>
+          <div class="form-group"><label>Supplier Email</label><input type="email" id="req-supplier-email" class="form-input" placeholder="supplier@example.com"/></div>
+          <div class="form-group"><label>Required By Date</label><input type="date" id="req-date" class="form-input"/></div>
+          <div class="form-group full-span"><label>Special Instructions</label><textarea id="req-notes" class="form-input" rows="2" placeholder="Purity, packaging, etc."></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="submitRawRequest()">📤 Submit Request to Supplier</button>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:1.5rem">
+        <h3 class="form-card-title">📜 My Raw Material Requests</h3>
+        <table class="data-table"><thead><tr><th>Request ID</th><th>Material</th><th>Qty</th><th>Supplier</th><th>Status</th><th>Barcode</th><th>Date</th></tr></thead>
+        <tbody id="my-requests-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- RECEIVED RAW -->
+    <div class="content-section" id="section-received">
+      <div class="section-header"><div><h1>✅ Received Raw Materials</h1><p class="section-desc">Verify and accept raw material shipments via barcode</p></div></div>
+      <div class="form-card">
+        <h3 class="form-card-title">🔍 Enter / Scan Barcode ID</h3>
+        <div class="alert" id="receive-alert"></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Barcode ID from Supplier <span class="req">*</span></label>
+            <div class="input-with-btn">
+              <input type="text" id="receive-barcode-id" class="form-input" placeholder="RAW-XXXX-XXXXX"/>
+              <button class="btn-secondary" onclick="verifyReceiveBarcode()">🔍 Verify</button>
+            </div>
+          </div>
+        </div>
+        <div id="receive-verify-result"></div>
+        <div id="receive-confirm-form" style="display:none">
+          <div class="form-grid" style="margin-top:1rem">
+            <div class="form-group"><label>Received City</label>
+              <select id="receive-city" class="form-input"><option value="">-- Select City --</option></select>
+            </div>
+            <div class="form-group"><label>Vehicle / Transport</label><input type="text" id="receive-vehicle" class="form-input" placeholder="Vehicle number"/></div>
+            <div class="form-group"><label>Received By</label><input type="text" id="receive-by" class="form-input" placeholder="Name"/></div>
+          </div>
+          <button class="btn-primary" onclick="confirmReceive()">✅ Confirm Receipt & Record on Blockchain</button>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:1.5rem">
+        <h3 class="form-card-title">📦 All Received Raw Materials</h3>
+        <table class="data-table"><thead><tr><th>Barcode ID</th><th>Material</th><th>Qty</th><th>From Supplier</th><th>Received At</th><th>City</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="received-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- MANUFACTURE & DISPATCH -->
+    <div class="content-section" id="section-manufacture">
+      <div class="section-header"><div><h1>⚗️ Manufacture & Dispatch</h1><p class="section-desc">Convert raw materials into finished products and dispatch to distributor</p></div></div>
+      <div class="form-card">
+        <h3 class="form-card-title">⚗️ Load Raw Batch & Manufacture</h3>
+        <div class="alert" id="mfr-alert"></div>
+
+        <!-- Hidden field for linked distributor request -->
+        <input type="hidden" id="mfr-dist-req-id" value=""/>
+
+        <div class="form-grid">
+          <div class="form-group"><label>Raw Batch Barcode ID <span class="req">*</span></label>
+            <div class="input-with-btn">
+              <input type="text" id="mfr-raw-barcode" class="form-input" placeholder="Enter received RAW-XXXX barcode"/>
+              <button class="btn-secondary" onclick="loadRawForMfr()">🔍 Load</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="mfr-raw-info"></div>
+
+        <div id="mfr-form" style="display:none">
+          <h4 style="margin:1rem 0 0.5rem;color:var(--navy)">Manufactured Product & Dispatch Details</h4>
+          <div class="form-grid">
+            <div class="form-group"><label>Finished Product Name <span class="req">*</span></label><input type="text" id="mfr-product" class="form-input" placeholder="e.g. Pharmaceutical Grade Acetic Acid"/></div>
+            <div class="form-group"><label>Finished Quantity (kg) <span class="req">*</span></label><input type="number" id="mfr-qty" class="form-input" placeholder="500"/></div>
+            <div class="form-group"><label>Chemical Composition</label><input type="text" id="mfr-composition" class="form-input" placeholder="e.g. CH3COOH 99.9%"/></div>
+            <div class="form-group"><label>Batch Number</label><input type="text" id="mfr-batch" class="form-input" placeholder="MFR-BATCH-001"/></div>
+            <div class="form-group"><label>Distributor Name <span class="req">*</span></label><input type="text" id="mfr-dist-name" class="form-input" placeholder="Distributor company name"/></div>
+            <div class="form-group"><label>Distributor URN</label><input type="text" id="mfr-dist-urn" class="form-input" placeholder="NCB URN"/></div>
+            <div class="form-group"><label>Vehicle Number <span class="req">*</span></label><input type="text" id="mfr-vehicle" class="form-input" placeholder="MH12AB1234"/></div>
+            <div class="form-group"><label>Driver Name</label><input type="text" id="mfr-driver" class="form-input" placeholder="Driver full name"/></div>
+            <div class="form-group"><label>Transport Permit</label><input type="text" id="mfr-permit" class="form-input" placeholder="Permit number"/></div>
+            <div class="form-group"><label>Dispatch City</label>
+              <select id="mfr-city" class="form-input"><option value="">-- Select City --</option></select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" onclick="submitManufacture()">⚗️ Manufacture & Dispatch — Generate Child QR</button>
+          </div>
+        </div>
+
+        <div id="mfr-qr-result" style="display:none" class="qr-result-box">
+          <h4>✅ Child QR Generated — Distributor ko scan karke receive karna hoga</h4>
+          <div class="qr-result-grid">
+            <div id="mfr-qr-canvas"></div>
+            <div class="qr-result-info">
+              <p><strong>Barcode ID:</strong> <span id="mfr-qr-id"></span></p>
+              <p><strong>Product:</strong> <span id="mfr-qr-product"></span></p>
+              <p><strong>Qty:</strong> <span id="mfr-qr-qty"></span> kg</p>
+              <p><strong>To Distributor:</strong> <span id="mfr-qr-to"></span></p>
+              <p><strong>Parent (Raw):</strong> <span id="mfr-qr-parent"></span></p>
+              <button class="btn-sm" onclick="printQR(document.getElementById('mfr-qr-id').textContent)">🖨 Print QR</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR MANAGER -->
+    <div class="content-section" id="section-qr">
+      <div class="section-header"><div><h1>🔲 QR Code Manager</h1><p class="section-desc">View, print and track all generated barcodes</p></div></div>
+      <div id="qr-cards-grid" class="qr-cards-grid"></div>
+    </div>
+
+    <!-- SCAN -->
+    <div class="content-section" id="section-scan">
+      <div class="section-header"><div><h1>📷 Scan / Verify Barcode</h1><p class="section-desc">Enter barcode ID to verify and view chain history</p></div></div>
+      <div class="form-card">
+        <div class="form-group">
+          <div class="input-with-btn">
+            <input type="text" id="scan-input" class="form-input" placeholder="Enter barcode ID e.g. RAW-XXXXX or MFR-XXXXX"/>
+            <button class="btn-primary" onclick="scanQR()">🔍 Verify</button>
+          </div>
+        </div>
+        <div id="scan-result" style="margin-top:1rem"></div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="content-section" id="section-history">
+      <div class="section-header"><div><h1>📜 Full Activity History</h1><p class="section-desc">Complete log of all requests, receipts and dispatches</p></div></div>
+      <div class="form-card">
+        <table class="data-table"><thead><tr><th>#</th><th>ID</th><th>Type</th><th>Material</th><th>Qty</th><th>Party</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody id="history-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="content-section" id="section-profile">
+      <div class="section-header"><div><h1>🏢 My Profile</h1></div></div>
+      <div class="form-card">
+        <div class="profile-grid">
+          <div class="profile-row"><span class="profile-label">Company</span><span class="profile-value" id="prof-company">—</span></div>
+          <div class="profile-row"><span class="profile-label">Email</span><span class="profile-value" id="prof-email">—</span></div>
+          <div class="profile-row"><span class="profile-label">Phone</span><span class="profile-value" id="prof-phone">—</span></div>
+          <div class="profile-row"><span class="profile-label">Owner</span><span class="profile-value" id="prof-owner">—</span></div>
+          <div class="profile-row"><span class="profile-label">State</span><span class="profile-value" id="prof-state">—</span></div>
+          <div class="profile-row"><span class="profile-label">GST</span><span class="profile-value" id="prof-gst">—</span></div>
+          <div class="profile-row"><span class="profile-label">URN</span><span class="profile-value" id="prof-urn">—</span></div>
+          <div class="profile-row"><span class="profile-label">CBN License</span><span class="profile-value" id="prof-cbn">—</span></div>
+          <div class="profile-row"><span class="profile-label">Approved At</span><span class="profile-value" id="prof-approved">—</span></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- CHAIN MODAL -->
+<div class="modal-overlay" id="chain-modal">
+  <div class="modal-box modal-lg">
+    <div class="modal-header"><h3>🔗 Chain — <span id="chain-modal-id"></span></h3><button class="modal-close" onclick="closeModal('chain-modal')">✕</button></div>
+    <div class="modal-body">
+      <p style="color:var(--gray);margin-bottom:0.5rem"><strong>Material:</strong> <span id="chain-modal-material"></span></p>
+      <div class="chain-qr-row"><div id="chain-modal-qr"></div></div>
+      <div id="chain-modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="barcode-engine.js"></script>
+<script src="manufacturer.js"></script>
+</body>
+</html>

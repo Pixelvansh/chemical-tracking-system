@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Supplier Dashboard — ChemTrack India</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="supplier.css"/>
+</head>
+<body>
+
+<!-- SESSION CHECK -->
+<script>
+  const _sess = localStorage.getItem('chemtrack_session');
+  if (!_sess) { window.location.href = 'login.html'; }
+  else {
+    const _s = JSON.parse(_sess);
+    if (_s.role !== 'supplier' || _s.status !== 'approved') {
+      window.location.href = 'login.html';
+    }
+  }
+</script>
+
+<!-- NAVBAR -->
+<nav class="dash-navbar">
+  <div class="nav-left">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <img src="logo.png" class="nav-logo"/>
+    <div class="nav-title">
+      <span>ChemTrack India</span>
+      <span>Supplier Portal</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info">
+      <span class="nav-user-name" id="nav-company-name">Loading...</span>
+      <span class="nav-user-role">📦 Supplier</span>
+    </div>
+    <button class="nav-logout" onclick="supplierLogout()">Logout 🚪</button>
+  </div>
+</nav>
+
+<!-- TRICOLOR -->
+<div class="tricolor-bar">
+  <span></span><span></span><span></span>
+</div>
+
+<!-- LAYOUT -->
+<div class="dash-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+
+      <li>
+        <a href="#" class="sidebar-item active"
+           onclick="showSection('dashboard',this); return false;">
+          <span class="s-icon">📊</span>
+          <span class="s-text">Dashboard</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('inventory',this); return false;">
+          <span class="s-icon">📦</span>
+          <span class="s-text">My Inventory</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('dispatch',this); return false;">
+          <span class="s-icon">🚚</span>
+          <span class="s-text">Dispatch Material</span>
+          <span class="s-badge" id="badge-dispatch" style="display:none;">0</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('orders',this); return false;">
+          <span class="s-icon">📋</span>
+          <span class="s-text">Orders Received</span>
+          <span class="s-badge" id="badge-orders" style="display:none;">0</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('qr',this); return false;">
+          <span class="s-icon">🔲</span>
+          <span class="s-text">QR Manager</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('scan-qr',this); return false;">
+          <span class="s-icon">📷</span>
+          <span class="s-text">Scan Barcode</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('history',this); return false;">
+          <span class="s-icon">📜</span>
+          <span class="s-text">Dispatch History</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('compliance',this); return false;">
+          <span class="s-icon">✅</span>
+          <span class="s-text">Compliance</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('profile',this); return false;">
+          <span class="s-icon">🏢</span>
+          <span class="s-text">My Profile</span>
+        </a>
+      </li>
+
+    </ul>
+    <div class="sidebar-footer">
+      <p>🇮🇳 NCB Approved Supplier</p>
+      <p id="sidebar-urn">URN: Loading...</p>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="dash-main">
+
+    <!-- ══════════════════════════════
+         DASHBOARD
+    ══════════════════════════════ -->
+    <div class="content-section active" id="section-dashboard">
+
+      <div class="section-header">
+        <div>
+          <h1 id="welcome-msg">Welcome, Supplier</h1>
+          <p class="section-desc" id="welcome-sub">NCB Approved — Supplier Portal</p>
+        </div>
+        <span class="approved-badge">✅ NCB APPROVED</span>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="cards-grid">
+        <div class="summary-card orange">
+          <div class="card-icon">📦</div>
+          <div class="card-info">
+            <span class="card-number" id="stat-stock">0</span>
+            <span class="card-label">Total Stock (kg)</span>
+          </div>
+        </div>
+        <div class="summary-card green">
+          <div class="card-icon">🚚</div>
+          <div class="card-info">
+            <span class="card-number" id="stat-dispatched">0</span>
+            <span class="card-label">Total Dispatched</span>
+          </div>
+        </div>
+        <div class="summary-card blue">
+          <div class="card-icon">📋</div>
+          <div class="card-info">
+            <span class="card-number" id="stat-orders">0</span>
+            <span class="card-label">Pending Orders</span>
+          </div>
+        </div>
+        <div class="summary-card navy">
+          <div class="card-icon">✅</div>
+          <div class="card-info">
+            <span class="card-number" id="stat-completed">0</span>
+            <span class="card-label">Completed Orders</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="qa-grid">
+          <button class="qa-btn orange"
+            onclick="showSection('dispatch', document.querySelector('[onclick*=dispatch]'))">
+            🚚 Dispatch Material
+          </button>
+          <button class="qa-btn green"
+            onclick="showSection('inventory', document.querySelector('[onclick*=inventory]'))">
+            📦 View Inventory
+          </button>
+          <button class="qa-btn blue"
+            onclick="showSection('orders', document.querySelector('[onclick*=orders]'))">
+            📋 View Orders
+          </button>
+          <button class="qa-btn navy"
+            onclick="showSection('qr', document.querySelector('[onclick*=qr]'))">
+            🔲 QR Manager
+          </button>
+        </div>
+      </div>
+
+      <!-- RECENT DISPATCHES -->
+      <div class="table-section">
+        <div class="table-header">
+          <h3>Recent Dispatches</h3>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Dispatch ID</th>
+              <th>Material</th>
+              <th>Quantity</th>
+              <th>Sent To</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="recent-dispatch-tbody">
+            <tr>
+              <td colspan="6" class="empty-td">No dispatches yet. Start dispatching materials.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         INVENTORY
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-inventory">
+
+      <div class="section-header">
+        <h1>My Inventory</h1>
+        <span class="section-desc">Current stock of raw materials</span>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn-primary" onclick="openAddStock()">+ Add Stock Entry</button>
+      </div>
+
+      <div class="table-section">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Material Name</th>
+              <th>Available Stock (kg)</th>
+              <th>Unit Price</th>
+              <th>Last Updated</th>
+              <th>NCB Approval</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-tbody">
+            <tr>
+              <td colspan="7" class="empty-td">No inventory added yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         DISPATCH MATERIAL
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-dispatch">
+
+      <div class="section-header">
+        <h1>Dispatch Material</h1>
+        <span class="section-desc">Send raw materials to manufacturers — NCB tracked</span>
+      </div>
+
+      <div class="form-card">
+        <h3 class="form-card-title">🚚 New Dispatch Entry</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Material / Chemical Name <span class="req">*</span></label>
+            <input type="text" class="form-input" id="d-material" placeholder="e.g. Acetic Acid, Glacial"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quantity (kg) <span class="req">*</span></label>
+            <input type="number" class="form-input" id="d-qty" placeholder="e.g. 500"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Chemical Components / Composition <span class="req">*</span></label>
+            <input type="text" class="form-input" id="d-chemicals" placeholder="e.g. CH3COOH 99.5%, CAS No. 64-19-7"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Recipient Firm Name <span class="req">*</span></label>
+            <input type="text" class="form-input" id="d-recipient" placeholder="Manufacturer company name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Recipient URN No. <span class="req">*</span></label>
+            <input type="text" class="form-input" id="d-recipient-urn" placeholder="NCB URN of recipient"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Vehicle Number <span class="req">*</span></label>
+            <input type="text" class="form-input" id="d-vehicle" placeholder="e.g. MH 12 AB 3456"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Driver Name</label>
+            <input type="text" class="form-input" id="d-driver" placeholder="Driver full name"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Expected Delivery Date</label>
+            <input type="date" class="form-input" id="d-delivery-date"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">NCB Permit Number</label>
+            <input type="text" class="form-input" id="d-permit" placeholder="NCB transport permit no."/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Dispatch City (GPS Tracking)</label>
+            <select class="form-input" id="d-city"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Order Reference (auto-filled)</label>
+            <input type="text" class="form-input" id="d-order-ref" placeholder="REQ-XXXXX"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Remarks / Notes</label>
+          <input type="text" class="form-input" id="d-remarks" placeholder="Any special instructions..."/>
+        </div>
+        <div class="gps-box" id="gps-box">
+          <span>📍</span>
+          <span id="gps-status">Select city above or capture live GPS</span>
+          <button class="btn-gps" onclick="captureGPS()">📡 Capture GPS</button>
+        </div>
+        <div class="form-actions">
+          <button class="btn-secondary" onclick="clearDispatchForm()">Clear Form</button>
+          <button class="btn-primary" onclick="submitDispatch()">🚚 Submit &amp; Generate QR</button>
+        </div>
+        <div id="dispatch-alert" class="alert"></div>
+        <div id="qr-result-panel" style="display:none;margin-top:1.5rem;background:linear-gradient(135deg,#f0f7ff,#e8f5e9);border:2px solid #2d7a4f;border-radius:12px;padding:1.5rem">
+          <h4 style="color:#2d7a4f;margin:0 0 1rem">&#10003; QR Code Generated Successfully</h4>
+          <div style="display:grid;grid-template-columns:170px 1fr;gap:1.5rem;align-items:start">
+            <div id="qr-result-canvas"></div>
+            <div>
+              <p style="margin:0.3rem 0;font-size:0.88rem"><strong>Barcode ID:</strong><br/><code id="qr-result-id" style="font-family:monospace;font-size:0.72rem;background:#f0f4ff;color:#132C54;padding:2px 6px;border-radius:4px;word-break:break-all"></code></p>
+              <p style="margin:0.3rem 0;font-size:0.88rem"><strong>Material:</strong> <span id="qr-result-material"></span></p>
+              <p style="margin:0.3rem 0;font-size:0.88rem"><strong>To:</strong> <span id="qr-result-to"></span></p>
+              <p style="margin:0.3rem 0;font-size:0.88rem"><strong>GPS:</strong> &#128205; <span id="qr-result-gps"></span></p>
+              <button onclick="printQR(document.getElementById('qr-result-id').textContent)" style="margin-top:0.5rem;padding:6px 14px;background:#132C54;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.82rem">Print QR</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- SCAN BARCODE SECTION -->
+    <div class="content-section" id="section-scan-qr">
+      <div class="section-header">
+        <h1>Scan / Verify Barcode</h1>
+        <span class="section-desc">Enter barcode ID to verify and view chain</span>
+      </div>
+      <div class="form-card">
+        <h3 class="form-card-title">Enter Barcode ID</h3>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+          <input type="text" id="scan-input" class="form-input" style="flex:1" placeholder="e.g. RAW-XXXXXX-XXXXX"/>
+          <button class="btn-primary" onclick="scanQR()">Verify</button>
+        </div>
+        <div id="scan-result"></div>
+      </div>
+    </div>
+
+    <!-- ORDERS RECEIVED -->
+    <div class="content-section" id="section-orders">
+
+      <div class="section-header">
+        <h1>Orders Received</h1>
+        <span class="section-desc">Purchase orders from manufacturers requiring your supply</span>
+      </div>
+
+      <div class="table-section">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>From Manufacturer</th>
+              <th>Material</th>
+              <th>Qty (kg)</th>
+              <th>Chemicals</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody">
+            <tr>
+              <td colspan="7" class="empty-td">No orders received yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         QR MANAGER
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-qr">
+      <div class="section-header">
+        <h1>QR Manager</h1>
+        <span class="section-desc">Generate and manage QR codes for dispatched materials</span>
+      </div>
+
+      <div class="qr-info-box">
+        <span class="qr-info-icon">ℹ️</span>
+        <div>
+          <p>Each dispatch automatically generates a <strong>QR Code</strong> linked to NCB blockchain.</p>
+          <p style="font-size:0.82rem;color:var(--gray);margin-top:4px;">
+            Every kg of material is tracked from your warehouse to the manufacturer. Any mismatch triggers an NCB alert.
+          </p>
+        </div>
+      </div>
+
+      <div class="table-section">
+        <div class="table-header">
+          <h3>Generated QR Codes</h3>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>QR ID</th>
+              <th>Material</th>
+              <th>Qty</th>
+              <th>Recipient</th>
+              <th>Generated On</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="qr-tbody">
+            <tr>
+              <td colspan="7" class="empty-td">No QR codes generated yet. Dispatch a material to generate QR.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         DISPATCH HISTORY
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-history">
+
+      <div class="section-header">
+        <h1>Dispatch History</h1>
+        <span class="section-desc">Complete record of all dispatches</span>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" class="filter-input"
+               placeholder="Search by material, recipient..."
+               oninput="searchHistory(this.value)"/>
+        <select class="filter-select" onchange="filterHistory(this.value)">
+          <option value="all">All Status</option>
+          <option value="dispatched">Dispatched</option>
+          <option value="delivered">Delivered</option>
+          <option value="pending">Pending</option>
+        </select>
+      </div>
+
+      <div class="table-section">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Dispatch ID</th>
+              <th>Material</th>
+              <th>Qty (kg)</th>
+              <th>Recipient</th>
+              <th>Vehicle</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr>
+              <td colspan="8" class="empty-td">No dispatch history yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         COMPLIANCE
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-compliance">
+
+      <div class="section-header">
+        <h1>Compliance Status</h1>
+        <span class="section-desc">Your NCB compliance overview</span>
+      </div>
+
+      <div class="compliance-grid">
+
+        <div class="compliance-card green">
+          <div class="comp-icon">✅</div>
+          <div class="comp-info">
+            <span class="comp-title">Registration Status</span>
+            <span class="comp-value green-text">NCB APPROVED</span>
+          </div>
+        </div>
+
+        <div class="compliance-card green">
+          <div class="comp-icon">📄</div>
+          <div class="comp-info">
+            <span class="comp-title">License Status</span>
+            <span class="comp-value green-text">VALID</span>
+          </div>
+        </div>
+
+        <div class="compliance-card orange">
+          <div class="comp-icon">📊</div>
+          <div class="comp-info">
+            <span class="comp-title">Compliance Score</span>
+            <span class="comp-value orange-text" id="comp-score">100%</span>
+          </div>
+        </div>
+
+        <div class="compliance-card blue">
+          <div class="comp-icon">🔗</div>
+          <div class="comp-info">
+            <span class="comp-title">Blockchain Records</span>
+            <span class="comp-value blue-text" id="comp-blockchain">0 entries</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="compliance-rules">
+        <h3>NCB Compliance Rules for Suppliers</h3>
+        <div class="rule-item">
+          <span class="rule-icon green-text">✅</span>
+          <span>All dispatches must have valid NCB transport permit</span>
+        </div>
+        <div class="rule-item">
+          <span class="rule-icon green-text">✅</span>
+          <span>Recipient URN must be verified before dispatch</span>
+        </div>
+        <div class="rule-item">
+          <span class="rule-icon green-text">✅</span>
+          <span>QR code must be attached to every shipment</span>
+        </div>
+        <div class="rule-item">
+          <span class="rule-icon green-text">✅</span>
+          <span>GPS location captured at time of dispatch</span>
+        </div>
+        <div class="rule-item">
+          <span class="rule-icon orange-text">⚠️</span>
+          <span>Monthly dispatch report must be submitted to NCB</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         PROFILE
+    ══════════════════════════════ -->
+    <div class="content-section" id="section-profile">
+
+      <div class="section-header">
+        <h1>My Profile</h1>
+        <span class="section-desc">Your registered firm details</span>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="profile-avatar">📦</div>
+          <div>
+            <h2 id="prof-company">—</h2>
+            <span class="cat-badge">📦 Supplier</span>
+            <span class="status-badge approved" style="margin-left:8px;">✅ APPROVED</span>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <div class="profile-field">
+            <label>📧 Email</label>
+            <span id="prof-email">—</span>
+          </div>
+          <div class="profile-field">
+            <label>📞 Phone</label>
+            <span id="prof-phone">—</span>
+          </div>
+          <div class="profile-field">
+            <label>🏢 Company Name</label>
+            <span id="prof-company2">—</span>
+          </div>
+          <div class="profile-field">
+            <label>👤 Owner Name</label>
+            <span id="prof-owner">—</span>
+          </div>
+          <div class="profile-field">
+            <label>💼 Designation</label>
+            <span id="prof-designation">—</span>
+          </div>
+          <div class="profile-field">
+            <label>📍 State</label>
+            <span id="prof-state">—</span>
+          </div>
+          <div class="profile-field">
+            <label>🏙️ City</label>
+            <span id="prof-city">—</span>
+          </div>
+          <div class="profile-field">
+            <label>🪪 GST No.</label>
+            <span id="prof-gst">—</span>
+          </div>
+          <div class="profile-field">
+            <label>🏛️ URN No.</label>
+            <span id="prof-urn">—</span>
+          </div>
+          <div class="profile-field">
+            <label>📋 PAN</label>
+            <span id="prof-pan">—</span>
+          </div>
+          <div class="profile-field">
+            <label>📜 WDL Number</label>
+            <span id="prof-wdl">—</span>
+          </div>
+          <div class="profile-field">
+            <label>🧪 Raw Materials</label>
+            <span id="prof-materials">—</span>
+          </div>
+          <div class="profile-field">
+            <label>📅 Registered On</label>
+            <span id="prof-registered">—</span>
+          </div>
+          <div class="profile-field">
+            <label>✅ Approved On</label>
+            <span id="prof-approved">—</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- ADD STOCK MODAL -->
+<div class="modal-overlay" id="stock-modal">
+  <div class="modal">
+    <div class="modal-header orange">
+      <h3>📦 Add Stock Entry</h3>
+      <button onclick="closeModal('stock-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Material Name <span class="req">*</span></label>
+        <input type="text" class="form-input" id="stock-material"
+               placeholder="e.g. Acetic Acid"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Quantity (kg) <span class="req">*</span></label>
+        <input type="number" class="form-input" id="stock-qty"
+               placeholder="e.g. 1000"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Unit Price (₹/kg)</label>
+        <input type="number" class="form-input" id="stock-price"
+               placeholder="e.g. 250"/>
+      </div>
+      <div id="stock-alert" class="alert"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeModal('stock-modal')">Cancel</button>
+      <button class="btn-modal-confirm orange" onclick="saveStock()">+ Add Stock</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- CHAIN MODAL -->
+<div class="modal-overlay" id="chain-modal">
+  <div style="background:#fff;border-radius:14px;max-width:680px;width:95vw;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;border-bottom:2px solid #e0e8f4">
+      <h3 style="margin:0;color:#132C54">Chain Tracking — <span id="chain-modal-id"></span></h3>
+      <button onclick="closeModal('chain-modal')" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666">&#x2715;</button>
+    </div>
+    <div style="padding:1.5rem">
+      <p style="color:#666;margin-bottom:0.5rem"><strong>Material:</strong> <span id="chain-modal-material"></span></p>
+      <div style="display:flex;justify-content:center;margin:0.5rem 0"><div id="chain-modal-qr"></div></div>
+      <div id="chain-modal-body"></div>
+    </div>
+  </div>
+</div>
+<link rel="stylesheet" href="manufacturer.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="barcode-engine.js"></script>
+<script src="supplier.js"></script>
+</body>
+</html>

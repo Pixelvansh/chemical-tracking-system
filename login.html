@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login / Register — ChemTrack India</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="login.css"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="index.html" class="nav-brand">
+    <img src="logo.png" alt="Logo" class="nav-logo"/>
+    <div class="nav-title">
+      <span>ChemTrack India</span>
+      <span>National Chemical Authority · by NCB</span>
+    </div>
+  </a>
+  <a href="index.html" class="nav-back">← Back to Home</a>
+</nav>
+<div class="tricolor-bar"><span></span><span></span><span></span></div>
+
+<div class="auth-wrapper">
+
+  <!-- LEFT PANEL -->
+  <div class="auth-left">
+    <img src="logo.png" class="auth-left-logo"/>
+    <h2><span>National</span> Chemical<br/>Registry Portal</h2>
+    <p>End-to-end tracking of all 7 controlled precursor chemicals. Every gram. Every movement. Every transaction — secured on blockchain.</p>
+    <ul class="left-features">
+      <li><span>🔲</span> Hierarchical QR Tracking</li>
+      <li><span>📍</span> Real-time GPS on Every Drum</li>
+      <li><span>⚖️</span> Mass Balance Verification</li>
+      <li><span>🔗</span> Blockchain Immutable Records</li>
+      <li><span>🚨</span> Instant NCB Alert System</li>
+      <li><span>✅</span> NCB Approval Required</li>
+    </ul>
+    <p class="auth-left-tagline">"Control the Chemical, Secure the Nation"</p>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="auth-right">
+
+    <!-- MAIN TABS -->
+    <div class="auth-tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn" onclick="switchTab('register')">Register Firm</button>
+      <button class="tab-btn" onclick="switchTab('admin')">Admin Login</button>
+    </div>
+
+    <!-- ══════════ LOGIN ══════════ -->
+    <div class="form-section active" id="tab-login">
+      <h2 class="form-title">Welcome Back</h2>
+      <p class="form-subtitle">Login with your NCB approved firm credentials</p>
+
+      <div class="alert" id="login-alert"></div>
+
+      <!-- PENDING STATUS BOX — shown if user registered but not approved -->
+      <div class="pending-box" id="pending-box" style="display:none;">
+        <span class="pending-icon">⏳</span>
+        <div>
+          <p class="pending-title">Registration Under Review</p>
+          <p class="pending-desc">Your firm registration is pending NCB approval. You will receive an email once approved. This process takes 3–5 working days.</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Official Company Email <span>*</span></label>
+        <input type="email" class="form-input" id="login-email" placeholder="company@example.com"/>
+        <div class="input-error" id="err-login-email">Please enter valid email</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password <span>*</span></label>
+        <div class="password-wrapper">
+          <input type="password" class="form-input" id="login-password" placeholder="Enter your password"/>
+          <button class="toggle-password" onclick="togglePass('login-password',this)">👁</button>
+        </div>
+        <div class="input-error" id="err-login-pass">Password is required</div>
+      </div>
+
+      <button class="btn-submit orange" onclick="handleLogin()">Login to Portal</button>
+
+      <div class="auth-note">
+        New firm? <a href="#" onclick="switchTab('register')">Register here</a> ·
+        <a href="#">Forgot Password?</a>
+      </div>
+    </div>
+
+    <!-- ══════════ REGISTER ══════════ -->
+    <div class="form-section" id="tab-register">
+      <h2 class="form-title">Register Your Firm</h2>
+      <p class="form-subtitle">Select category first — only your relevant documents will appear</p>
+
+      <div class="alert" id="register-alert"></div>
+
+      <!-- STEP 1: CATEGORY -->
+      <div class="section-divider">📂 Step 1 — Select Your Category</div>
+      <div class="category-grid">
+        <label class="category-card" onclick="selectCategory('manufacturer',this)">
+          <input type="radio" name="cat" value="manufacturer"/>
+          <span class="category-icon">🏭</span>
+          <span class="category-name">Manufacturer</span>
+          <span class="category-desc">Chemical producer</span>
+        </label>
+        <label class="category-card" onclick="selectCategory('distributor',this)">
+          <input type="radio" name="cat" value="distributor"/>
+          <span class="category-icon">🚚</span>
+          <span class="category-name">Distributor</span>
+          <span class="category-desc">Supply chain</span>
+        </label>
+        <label class="category-card" onclick="selectCategory('supplier',this)">
+          <input type="radio" name="cat" value="supplier"/>
+          <span class="category-icon">📦</span>
+          <span class="category-name">Supplier</span>
+          <span class="category-desc">Raw material</span>
+        </label>
+        <label class="category-card" onclick="selectCategory('consumer',this)">
+          <input type="radio" name="cat" value="consumer"/>
+          <span class="category-icon">🏥</span>
+          <span class="category-name">Consumer</span>
+          <span class="category-desc">Hospital/Pharma</span>
+        </label>
+        <label class="category-card" onclick="selectCategory('retailer',this)">
+          <input type="radio" name="cat" value="retailer"/>
+          <span class="category-icon">🏪</span>
+          <span class="category-name">Retailer</span>
+          <span class="category-desc">End retail</span>
+        </label>
+        <label class="category-card" onclick="selectCategory('exporter',this)">
+          <input type="radio" name="cat" value="exporter"/>
+          <span class="category-icon">✈️</span>
+          <span class="category-name">Exporter</span>
+          <span class="category-desc">Export/Import</span>
+        </label>
+      </div>
+
+      <!-- FORM FIELDS — shown after category select -->
+      <div id="reg-form-body" style="display:none;">
+
+        <!-- COMMON FIELDS -->
+        <div class="section-divider">🏢 Company Details</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Company Name <span>*</span></label>
+            <input type="text" class="form-input" placeholder="Legal company name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">URN Number <span>*</span></label>
+            <input type="text" class="form-input" placeholder="NCB URN number"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">GST Number <span>*</span></label>
+            <input type="text" class="form-input" placeholder="22AAAAA0000A1Z5"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">PAN Number <span>*</span></label>
+            <input type="text" class="form-input" placeholder="ABCDE1234F"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">State <span>*</span></label>
+            <select class="form-input">
+              <option value="">Select State</option>
+              <option>Delhi</option><option>Haryana</option>
+              <option>Maharashtra</option><option>Gujarat</option>
+              <option>Punjab</option><option>Uttar Pradesh</option>
+              <option>Rajasthan</option><option>Tamil Nadu</option>
+              <option>Karnataka</option><option>West Bengal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">City <span>*</span></label>
+            <input type="text" class="form-input" placeholder="City name"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Full Address <span>*</span></label>
+          <input type="text" class="form-input" placeholder="Street, Area, Pincode"/>
+        </div>
+
+        <!-- CONTACT -->
+        <div class="section-divider">👤 Contact Person</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Owner / Director Name <span>*</span></label>
+            <input type="text" class="form-input" placeholder="Full name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Designation <span>*</span></label>
+            <input type="text" class="form-input" placeholder="MD / CEO / Partner"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Official Email <span>*</span></label>
+            <input type="email" class="form-input" id="reg-email" placeholder="company@example.com"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number <span>*</span></label>
+            <input type="tel" class="form-input" placeholder="+91 XXXXX XXXXX"/>
+          </div>
+        </div>
+
+        <!-- COMMON DOCUMENTS -->
+        <div class="section-divider">📄 Common Documents</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">GST Certificate <span>*</span></label>
+            <div class="file-upload">
+              <input type="file" accept=".pdf,.jpg,.png" onchange="showFileName(this,'gst-name')"/>
+              <span class="file-upload-icon">📄</span>
+              <p class="file-upload-text"><strong>Click to upload</strong> GST Certificate</p>
+              <p class="file-name" id="gst-name"></p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">URN Certificate <span>*</span></label>
+            <div class="file-upload">
+              <input type="file" accept=".pdf,.jpg,.png" onchange="showFileName(this,'urn-name')"/>
+              <span class="file-upload-icon">🏛️</span>
+              <p class="file-upload-text"><strong>Click to upload</strong> NCB URN Certificate</p>
+              <p class="file-name" id="urn-name"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── MANUFACTURER SPECIFIC ── -->
+        <div class="dynamic-fields" id="fields-manufacturer">
+          <div class="section-divider">🏭 Manufacturer Documents</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">CBN License Number <span>*</span></label>
+              <input type="text" class="form-input" placeholder="CBN Mfg License No."/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Annual Production Capacity (kg) <span>*</span></label>
+              <input type="number" class="form-input" placeholder="e.g. 5000"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Drug Manufacturing License (Form 25) <span>*</span></label>
+            <div class="file-upload">
+              <input type="file" accept=".pdf" onchange="showFileName(this,'mfr-lic-name')"/>
+              <span class="file-upload-icon">📋</span>
+              <p class="file-upload-text"><strong>Upload</strong> Manufacturing License</p>
+              <p class="file-name" id="mfr-lic-name"></p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Chemicals You Manufacture <span>*</span></label>
+            <div class="check-grid">
+              <label class="check-item"><input type="checkbox"/> Acetic Anhydride</label>
+              <label class="check-item"><input type="checkbox"/> Ephedrine</label>
+              <label class="check-item"><input type="checkbox"/> Pseudoephedrine</label>
+              <label class="check-item"><input type="checkbox"/> Potassium Permanganate</label>
+              <label class="check-item"><input type="checkbox"/> N-Acetylanthranilic Acid</label>
+              <label class="check-item"><input type="checkbox"/> Norephedrine</label>
+              <label class="check-item"><input type="checkbox"/> Piperonal</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── DISTRIBUTOR SPECIFIC ── -->
+        <div class="dynamic-fields" id="fields-distributor">
+          <div class="section-divider">🚚 Distributor Documents</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Distribution License No. <span>*</span></label>
+              <input type="text" class="form-input" placeholder="State Drug License No."/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Service Area Coverage <span>*</span></label>
+              <select class="form-input">
+                <option value="">Select coverage</option>
+                <option>City Level</option>
+                <option>District Level</option>
+                <option>State Level</option>
+                <option>Multi-State</option>
+                <option>Pan India</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Warehouse Address <span>*</span></label>
+            <input type="text" class="form-input" placeholder="Warehouse / Storage location"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Distribution License Certificate <span>*</span></label>
+            <div class="file-upload">
+              <input type="file" accept=".pdf" onchange="showFileName(this,'dist-lic-name')"/>
+              <span class="file-upload-icon">📋</span>
+              <p class="file-upload-text"><strong>Upload</strong> Distribution License</p>
+              <p class="file-name" id="dist-lic-name"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SUPPLIER SPECIFIC ── -->
+        <div class="dynamic-fields" id="fields-supplier">
+          <div class="section-divider">📦 Supplier Documents</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Wholesale Drug License No. <span>*</span></label>
+              <input type="text" class="form-input" placeholder="WDL Number"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Raw Materials Supplied <span>*</span></label>
+              <input type="text" class="form-input" placeholder="e.g. Acetic Acid, Glacial"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Supplier License Document <span>*</span></label>
+            <div class="file-upload">
+              <input type="file" accept=".pdf" onchange="showFileName(this,'supp-lic-name')"/>
+              <span class="file-upload-icon">📋</span>
+              <p class="file-upload-text"><strong>Upload</strong> Supplier License</p>
+              <p class="file-name" id="supp-lic-name"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── CONSUMER SPECIFIC ── -->
+        <div class="dynamic-fields" id="fields-consumer">
+          <div class="section-divider">🏥 Consumer / Hospital / Pharma Documents</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Drug License No. <span>*</span></label>
+              <input type="text" class="form-input" placeholder="Form 20/21 number"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Monthly Chemical Need (kg)</label>
+              <input type="number" class="form-input" placeholder="Estimated kg/month"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Purpose of Chemical Use <span>*</span></label>
+            <select class="form-input">
+              <option value="">Select purpose</option>
+              <option>Pharmaceutical Manufacturing</option>
+              <option>Hospital / Medical Use</option>
+              <option>Research & Development</option>
+              <option>Industrial Use</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Drug License Certificate <span>*</span></label>
+            <div class="file-upload">
+              <input type="file" accept=".pdf" onchange="showFileName(this,'cons-lic-name')"/>
+              <span class="file-upload-icon">📋</span>
+              <p class="file-upload-text"><strong>Upload</strong> Drug License (Form 20/21)</p>
+              <p class="file-name" id="cons-lic-name"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── RETAILER SPECIFIC ── -->
+        <div class="dynamic-fields" id="fields-retailer">
+          <div class="section-divider">🏪 Retailer Documents</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Retail Drug License No. <span>*</span></label>
+              <input type="text" class="form-input" placeholder="RDL Number"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Shop Registration No. <span>*</span></label>
+              <input type="text" class="form-input" placeholder="Shop Act Number"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Retail License Certificate <span>*</span></label>
+            <div class="file-upload">
+              <input type="file" accept=".pdf" onchange="showFileName(this,'ret-lic-name')"/>
+              <span class="file-upload-icon">📋</span>
+              <p class="file-upload-text"><strong>Upload</strong> Retail License</p>
+              <p class="file-name" id="ret-lic-name"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── EXPORTER SPECIFIC ── -->
+        <div class="dynamic-fields" id="fields-exporter">
+          <div class="section-divider">✈️ Exporter / Importer Documents</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">IEC Code <span>*</span></label>
+              <input type="text" class="form-input" placeholder="Import Export Code"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">DGFT License No. <span>*</span></label>
+              <input type="text" class="form-input" placeholder="DGFT number"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Export Countries <span>*</span></label>
+              <input type="text" class="form-input" placeholder="e.g. USA, Germany, Japan"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Annual Export Volume (kg)</label>
+              <input type="number" class="form-input" placeholder="Estimated kg/year"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">IEC Certificate <span>*</span></label>
+            <div class="file-upload">
+              <input type="file" accept=".pdf" onchange="showFileName(this,'iec-name')"/>
+              <span class="file-upload-icon">📋</span>
+              <p class="file-upload-text"><strong>Upload</strong> IEC Certificate</p>
+              <p class="file-name" id="iec-name"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="section-divider">🔐 Set Login Credentials</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Create Password <span>*</span></label>
+            <div class="password-wrapper">
+              <input type="password" class="form-input" id="reg-pass" placeholder="Min 8 characters"/>
+              <button class="toggle-password" onclick="togglePass('reg-pass',this)">👁</button>
+            </div>
+            <p class="input-hint">Min 8 chars, 1 uppercase, 1 number, 1 special char</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password <span>*</span></label>
+            <div class="password-wrapper">
+              <input type="password" class="form-input" id="reg-pass-confirm" placeholder="Re-enter password"/>
+              <button class="toggle-password" onclick="togglePass('reg-pass-confirm',this)">👁</button>
+            </div>
+            <div class="input-error" id="err-pass-match">Passwords do not match</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="check-item" style="font-size:0.82rem;color:var(--gray);">
+            <input type="checkbox" id="reg-agree"/>
+            I certify all information is accurate and I am authorized to register this firm under NDPS Act 1985 and RCSO 2013. False information may result in URN cancellation and legal action.
+          </label>
+        </div>
+
+        <button class="btn-submit" onclick="handleRegister()">
+          Submit for NCB Approval
+        </button>
+
+        <p class="auth-note">
+          NCB will verify documents within 3–5 working days.
+          You will receive email confirmation once approved.
+          Already registered? <a href="#" onclick="switchTab('login')">Login here</a>
+        </p>
+
+      </div>
+    </div>
+
+    <!-- ══════════ ADMIN LOGIN ══════════ -->
+    <div class="form-section" id="tab-admin">
+      <h2 class="form-title">NCB Admin Login</h2>
+      <p class="form-subtitle">Secure multi-factor authentication required</p>
+
+      <div class="admin-notice">
+        🔒 Restricted to authorized NCB officers only. All access attempts are logged and monitored by NCB Security Division.
+      </div>
+
+      <!-- ATTEMPT DOTS -->
+      <div style="text-align:center;margin-bottom:1rem;">
+        <p style="font-size:0.78rem;color:var(--gray);margin-bottom:6px;">Login Attempts Remaining</p>
+        <div class="attempt-indicators">
+          <div class="attempt-dot available" id="dot-1" title="Attempt 1"></div>
+          <div class="attempt-dot available" id="dot-2" title="Attempt 2"></div>
+          <div class="attempt-dot available" id="dot-3" title="Attempt 3"></div>
+        </div>
+        <p style="font-size:0.72rem;color:var(--gray);margin-top:4px;" id="attempt-msg">3 attempts before freeze</p>
+      </div>
+
+      <!-- FREEZE BOX -->
+      <div class="freeze-overlay" id="freeze-overlay">
+        <span class="freeze-icon">🔒</span>
+        <p class="freeze-title">Account Frozen</p>
+        <p class="freeze-timer" id="freeze-timer">60:00</p>
+        <p class="freeze-desc">3 failed attempts. Access blocked for 1 hour.<br/>NCB Security Division has been notified.</p>
+      </div>
+
+      <!-- ADMIN FORM -->
+      <div id="admin-form-fields">
+        <div class="alert" id="admin-alert"></div>
+
+        <div class="form-group">
+          <label class="form-label">Admin Email ID <span>*</span></label>
+          <input type="email" class="form-input" id="admin-email" placeholder="ncb.officer@gov.in"/>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password <span>*</span></label>
+          <div class="password-wrapper">
+            <input type="password" class="form-input" id="admin-password" placeholder="Admin password"/>
+            <button class="toggle-password" onclick="togglePass('admin-password',this)">👁</button>
+          </div>
+        </div>
+
+        <div class="section-divider">🔑 Security Passkeys</div>
+        <p style="font-size:0.8rem;color:var(--gray);margin-bottom:1rem;">Both passkeys are required. Issued by NCB HQ only.</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Passkey 1 <span>*</span></label>
+            <div class="password-wrapper">
+              <input type="password" class="form-input" id="admin-pk1" placeholder="8-digit key" maxlength="8"/>
+              <button class="toggle-password" onclick="togglePass('admin-pk1',this)">👁</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Passkey 2 <span>*</span></label>
+            <div class="password-wrapper">
+              <input type="password" class="form-input" id="admin-pk2" placeholder="8-digit key" maxlength="8"/>
+              <button class="toggle-password" onclick="togglePass('admin-pk2',this)">👁</button>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-submit" onclick="handleAdminLogin()">🔐 Secure Admin Login</button>
+      </div>
+
+      <p class="auth-note">Lost passkeys? Contact <a href="#">security@ncb.gov.in</a></p>
+    </div>
+
+  </div>
+</div>
+
+<script src="login.js"></script>
+</body>
+</html>

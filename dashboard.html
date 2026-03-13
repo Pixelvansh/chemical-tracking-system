@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — ChemTrack India</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="dashboard.css"/>
+</head>
+<body>
+
+<!-- SESSION CHECK -->
+<script>
+  const session = JSON.parse(localStorage.getItem('chemtrack_session') || 'null');
+  if (!session || session.status !== 'approved') {
+    window.location.href = 'login.html';
+  }
+</script>
+
+<!-- NAVBAR -->
+<nav class="dash-navbar">
+  <div class="nav-left">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <img src="logo.png" class="nav-logo"/>
+    <div class="nav-title">
+      <span>ChemTrack India</span>
+      <span id="nav-role-label">Portal</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-firm-info">
+      <span class="nav-firm-name" id="nav-firm-name">Loading...</span>
+      <span class="nav-firm-role" id="nav-firm-role">—</span>
+    </div>
+    <div class="nav-notification" onclick="showSection('alerts', null)">
+      🔔 <span class="notif-badge">2</span>
+    </div>
+    <button class="nav-logout" onclick="userLogout()">Logout 🚪</button>
+  </div>
+</nav>
+
+<!-- TRICOLOR -->
+<div class="tricolor-bar">
+  <span></span><span></span><span></span>
+</div>
+
+<!-- LAYOUT -->
+<div class="dash-layout">
+
+  <!-- SIDEBAR — changes based on role -->
+  <aside class="sidebar" id="sidebar">
+    <ul class="sidebar-menu" id="sidebar-menu">
+      <!-- Filled by JS based on role -->
+    </ul>
+    <div class="sidebar-footer">
+      <p>🇮🇳 Ministry of Home Affairs</p>
+      <p>Narcotics Control Bureau</p>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="dash-main" id="dash-main">
+
+    <!-- ══════════════════════════════
+         MANUFACTURER SECTIONS
+    ══════════════════════════════ -->
+
+    <!-- MFR DASHBOARD -->
+    <div class="content-section" id="section-mfr-dashboard">
+      <div class="section-header">
+        <h1>Manufacturer Dashboard</h1>
+        <span class="live-badge">● LIVE</span>
+      </div>
+
+      <div class="cards-grid">
+        <div class="summary-card blue">
+          <div class="card-icon">📦</div>
+          <div class="card-info">
+            <span class="card-number">3</span>
+            <span class="card-label">Active Batches</span>
+          </div>
+        </div>
+        <div class="summary-card orange">
+          <div class="card-icon">⏳</div>
+          <div class="card-info">
+            <span class="card-number">1</span>
+            <span class="card-label">Pending NCB Requests</span>
+          </div>
+        </div>
+        <div class="summary-card green">
+          <div class="card-icon">🚚</div>
+          <div class="card-info">
+            <span class="card-number">8</span>
+            <span class="card-label">Dispatched This Month</span>
+          </div>
+        </div>
+        <div class="summary-card red">
+          <div class="card-icon">🚨</div>
+          <div class="card-info">
+            <span class="card-number">0</span>
+            <span class="card-label">Active Alerts</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="qa-grid">
+          <button class="qa-btn orange" onclick="showSection('mfr-raw-request',null)">
+            📋 New Raw Material Request
+          </button>
+          <button class="qa-btn blue" onclick="showSection('mfr-create-batch',null)">
+            ➕ Create New Batch
+          </button>
+          <button class="qa-btn green" onclick="showSection('mfr-dispatch',null)">
+            🚚 Dispatch Chemical
+          </button>
+          <button class="qa-btn navy" onclick="showSection('mfr-qr',null)">
+            🔲 QR Manager
+          </button>
+        </div>
+      </div>
+
+      <div class="table-section">
+        <div class="table-header">
+          <h3>Recent Batches</h3>
+          <button class="btn-view-all" onclick="showSection('mfr-batches',null)">View All →</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Batch ID</th>
+              <th>Chemical</th>
+              <th>Quantity</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CHEM001</strong></td>
+              <td>Acetic Anhydride</td>
+              <td>500 kg</td>
+              <td><span class="status-badge approved">ACTIVE</span></td>
+              <td>20/02/2026</td>
+              <td><button class="btn-sm blue">View QR</button> <button class="btn-sm green">Dispatch</button></td>
+            </tr>
+            <tr>
+              <td><strong>CHEM002</strong></td>
+              <td>Ephedrine</td>
+              <td>200 kg</td>
+              <td><span class="status-badge pending">IN TRANSIT</span></td>
+              <td>18/02/2026</td>
+              <td><button class="btn-sm blue">Track</button></td>
+            </tr>
+            <tr>
+              <td><strong>CHEM003</strong></td>
+              <td>Pseudoephedrine</td>
+              <td>150 kg</td>
+              <td><span class="status-badge delivered">DELIVERED</span></td>
+              <td>15/02/2026</td>
+              <td><button class="btn-sm navy">Audit Trail</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MFR RAW MATERIAL REQUEST -->
+    <div class="content-section" id="section-mfr-raw-request">
+      <div class="section-header">
+        <h1>Raw Material Request</h1>
+        <span class="section-desc">Request NCB approval before purchasing any chemical</span>
+      </div>
+
+      <div class="form-card">
+        <div class="section-divider">📋 Request Details</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Chemical Name <span>*</span></label>
+            <select class="form-input">
+              <option value="">Select Chemical</option>
+              <option>Acetic Anhydride</option>
+              <option>Ephedrine</option>
+              <option>Pseudoephedrine</option>
+              <option>Potassium Permanganate</option>
+              <option>N-Acetylanthranilic Acid</option>
+              <option>Norephedrine</option>
+              <option>Piperonal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quantity Required (kg) <span>*</span></label>
+            <input type="number" class="form-input" placeholder="e.g. 500"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Supplier Name <span>*</span></label>
+            <input type="text" class="form-input" placeholder="Registered supplier name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Supplier URN <span>*</span></label>
+            <input type="text" class="form-input" placeholder="Supplier URN number"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Purpose of Use <span>*</span></label>
+            <select class="form-input">
+              <option value="">Select purpose</option>
+              <option>Pharmaceutical Manufacturing</option>
+              <option>Industrial Chemical Production</option>
+              <option>Research & Development</option>
+              <option>Export (with DGFT approval)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Expected Delivery Date <span>*</span></label>
+            <input type="date" class="form-input"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Justification / Additional Notes</label>
+          <textarea class="form-input" rows="3"
+            placeholder="Why this quantity is needed, end product details..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Purchase Order Document</label>
+          <div class="file-upload">
+            <input type="file" accept=".pdf" onchange="showFileName(this,'po-name')"/>
+            <span class="file-upload-icon">📄</span>
+            <p class="file-upload-text"><strong>Upload</strong> Purchase Order (optional)</p>
+            <p class="file-name" id="po-name"></p>
+          </div>
+        </div>
+
+        <button class="btn-submit orange" onclick="showToast('✅ Request submitted to NCB for approval!','success')">
+          Submit Request to NCB
+        </button>
+      </div>
+
+      <!-- MY REQUESTS TABLE -->
+      <div class="table-section" style="margin-top:2rem;">
+        <div class="table-header">
+          <h3>My Previous Requests</h3>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Chemical</th>
+              <th>Qty (kg)</th>
+              <th>Submitted</th>
+              <th>Status</th>
+              <th>NCB Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>REQ001</strong></td>
+              <td>Acetic Anhydride</td>
+              <td>500</td>
+              <td>19/02/2026</td>
+              <td><span class="status-badge approved">APPROVED</span></td>
+              <td style="color:var(--green);font-size:0.8rem;">Approved by NCB Officer</td>
+            </tr>
+            <tr>
+              <td><strong>REQ002</strong></td>
+              <td>Ephedrine</td>
+              <td>200</td>
+              <td>21/02/2026</td>
+              <td><span class="status-badge pending">PENDING</span></td>
+              <td style="color:var(--gray);font-size:0.8rem;">Under Review</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MFR CREATE BATCH -->
+    <div class="content-section" id="section-mfr-create-batch">
+      <div class="section-header">
+        <h1>Create New Batch</h1>
+        <span class="section-desc">Only approved raw material requests can become batches</span>
+      </div>
+
+      <div class="form-card">
+        <div class="info-box blue">
+          ℹ️ Select an NCB-approved request below. System will auto-generate Master QR code for this batch.
+        </div>
+
+        <div class="section-divider">📦 Select Approved Request</div>
+        <div class="form-group">
+          <label class="form-label">NCB Approved Request <span>*</span></label>
+          <select class="form-input">
+            <option value="">Select approved request</option>
+            <option value="req001">REQ001 — Acetic Anhydride — 500kg — Approved</option>
+          </select>
+        </div>
+
+        <div class="section-divider">🏷️ Batch Details</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Batch ID (Auto)</label>
+            <input type="text" class="form-input" value="CHEM004" readonly
+                   style="background:#f0f3f6;color:var(--gray)"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Manufacturing Date <span>*</span></label>
+            <input type="date" class="form-input"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Raw Material Used (kg) <span>*</span></label>
+            <input type="number" class="form-input" placeholder="e.g. 500"
+                   oninput="calcWaste()"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Output Chemical (kg) <span>*</span></label>
+            <input type="number" class="form-input" placeholder="e.g. 450"
+                   oninput="calcWaste()"/>
+          </div>
+        </div>
+
+        <div class="waste-calc" id="waste-calc" style="display:none;">
+          <span class="waste-icon">⚖️</span>
+          <span id="waste-text">Waste/Loss: 50kg will be logged</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Number of Drums <span>*</span></label>
+          <input type="number" class="form-input" placeholder="e.g. 5" id="drum-count"
+                 oninput="previewQR()"/>
+          <p class="input-hint">System will generate one QR per drum (child QRs of Master)</p>
+        </div>
+
+        <div id="qr-preview" style="display:none;">
+          <div class="qr-preview-box">
+            <p class="qr-preview-title">🔲 QR Preview — Hierarchical Structure</p>
+            <div class="qr-tree" id="qr-tree"></div>
+          </div>
+        </div>
+
+        <button class="btn-submit" onclick="createBatch()">
+          ➕ Create Batch & Generate QR Codes
+        </button>
+      </div>
+    </div>
+
+    <!-- MFR DISPATCH -->
+    <div class="content-section" id="section-mfr-dispatch">
+      <div class="section-header">
+        <h1>Dispatch Chemical</h1>
+        <span class="section-desc">Scan QR and confirm dispatch to distributor</span>
+      </div>
+
+      <div class="form-card">
+        <div class="section-divider">🔲 Scan QR Code</div>
+        <div class="scan-box" onclick="simulateScan()">
+          <span class="scan-icon">📷</span>
+          <p class="scan-text">Click to Scan QR Code</p>
+          <p class="scan-sub">Camera will open on mobile device</p>
+        </div>
+
+        <div id="dispatch-form" style="display:none;">
+          <div class="scanned-result">
+            ✅ QR Scanned: <strong>CHEM001-DRUM-02</strong> |
+            Chemical: Acetic Anhydride | Qty: 100kg
+          </div>
+
+          <div class="section-divider">🚚 Dispatch Details</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Dispatch To (Distributor URN) <span>*</span></label>
+              <input type="text" class="form-input" placeholder="Enter distributor URN"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Vehicle Number <span>*</span></label>
+              <input type="text" class="form-input" placeholder="HR 26 XX 1234"/>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Driver Name <span>*</span></label>
+              <input type="text" class="form-input" placeholder="Driver full name"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Driver Phone <span>*</span></label>
+              <input type="tel" class="form-input" placeholder="+91 XXXXX XXXXX"/>
+            </div>
+          </div>
+
+          <div class="gps-capture">
+            <span>📍</span>
+            <div>
+              <p style="font-weight:600;font-size:0.88rem;">GPS Location Auto-Captured</p>
+              <p style="font-size:0.78rem;color:var(--gray);">
+                28.4089° N, 77.3178° E — Faridabad, Haryana
+              </p>
+            </div>
+            <span style="color:var(--green);font-weight:700;font-size:0.88rem;">✓ Captured</span>
+          </div>
+
+          <button class="btn-submit green" onclick="showToast('✅ Dispatch confirmed! Blockchain record created.','success')">
+            ✅ Confirm Dispatch
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MFR BATCHES -->
+    <div class="content-section" id="section-mfr-batches">
+      <div class="section-header">
+        <h1>My Batches</h1>
+        <span class="section-desc">All chemical batches with live status</span>
+      </div>
+      <div class="table-section">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Batch ID</th>
+              <th>Chemical</th>
+              <th>Total (kg)</th>
+              <th>Dispatched</th>
+              <th>Remaining</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CHEM001</strong></td>
+              <td>Acetic Anhydride</td>
+              <td>500</td>
+              <td>300</td>
+              <td>200</td>
+              <td><span class="status-badge approved">ACTIVE</span></td>
+              <td>
+                <button class="btn-sm blue">QR Codes</button>
+                <button class="btn-sm green">Dispatch</button>
+                <button class="btn-sm navy">Audit</button>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>CHEM002</strong></td>
+              <td>Ephedrine</td>
+              <td>200</td>
+              <td>200</td>
+              <td>0</td>
+              <td><span class="status-badge delivered">FULLY DISPATCHED</span></td>
+              <td><button class="btn-sm navy">Audit</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MFR QR MANAGER -->
+    <div class="content-section" id="section-mfr-qr">
+      <div class="section-header">
+        <h1>QR Code Manager</h1>
+        <span class="section-desc">Hierarchical QR — Split master QR into child QRs</span>
+      </div>
+
+      <div class="info-box orange">
+        🔲 <strong>Hierarchical QR System:</strong> Select a batch → View Master QR →
+        Split into child QRs for each drum. Every split is tracked on blockchain.
+        Parent = Sum of Children. Mismatch = NCB Alert.
+      </div>
+
+      <div class="form-card" style="margin-top:1.5rem;">
+        <div class="form-group">
+          <label class="form-label">Select Batch</label>
+          <select class="form-input" onchange="loadQRTree(this.value)">
+            <option value="">Select batch to view QRs</option>
+            <option value="CHEM001">CHEM001 — Acetic Anhydride — 500kg</option>
+            <option value="CHEM002">CHEM002 — Ephedrine — 200kg</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="qr-manager-tree" style="display:none;">
+        <div class="qr-master-card">
+          <div class="qr-master-header">
+            🔲 MASTER QR — CHEM001
+          </div>
+          <div class="qr-master-body">
+            <div class="qr-code-box">
+              <div class="qr-code-img">QR</div>
+              <p>MASTER-CHEM001</p>
+              <p style="color:var(--gray);font-size:0.78rem;">500kg Total</p>
+              <button class="btn-sm blue" style="margin-top:8px;">🖨️ Print</button>
+            </div>
+            <div class="qr-children">
+              <p class="qr-children-title">Child QRs (Drums)</p>
+              <div class="qr-child-grid">
+                <div class="qr-child-card green">
+                  <p class="qr-child-id">CHEM001-D01</p>
+                  <p class="qr-child-qty">100 kg</p>
+                  <p class="qr-child-status">✅ Delivered</p>
+                  <button class="btn-sm navy">Print</button>
+                </div>
+                <div class="qr-child-card orange">
+                  <p class="qr-child-id">CHEM001-D02</p>
+                  <p class="qr-child-qty">100 kg</p>
+                  <p class="qr-child-status">🚚 In Transit</p>
+                  <button class="btn-sm navy">Print</button>
+                </div>
+                <div class="qr-child-card blue">
+                  <p class="qr-child-id">CHEM001-D03</p>
+                  <p class="qr-child-qty">100 kg</p>
+                  <p class="qr-child-status">🏭 In Factory</p>
+                  <button class="btn-sm navy">Print</button>
+                </div>
+                <div class="qr-child-card blue">
+                  <p class="qr-child-id">CHEM001-D04</p>
+                  <p class="qr-child-qty">100 kg</p>
+                  <p class="qr-child-status">🏭 In Factory</p>
+                  <button class="btn-sm navy">Print</button>
+                </div>
+                <div class="qr-child-card blue">
+                  <p class="qr-child-id">CHEM001-D05</p>
+                  <p class="qr-child-qty">100 kg</p>
+                  <p class="qr-child-status">🏭 In Factory</p>
+                  <button class="btn-sm navy">Print</button>
+                </div>
+              </div>
+              <button class="btn-sm orange" style="margin-top:1rem;padding:8px 16px;"
+                      onclick="showToast('🔲 Split QR feature — coming in next build!','info')">
+                ➕ Add New Split
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         DISTRIBUTOR SECTIONS
+    ══════════════════════════════ -->
+
+    <!-- DIST DASHBOARD -->
+    <div class="content-section" id="section-dist-dashboard">
+      <div class="section-header">
+        <h1>Distributor Dashboard</h1>
+        <span class="live-badge">● LIVE</span>
+      </div>
+      <div class="cards-grid">
+        <div class="summary-card blue">
+          <div class="card-icon">📥</div>
+          <div class="card-info">
+            <span class="card-number">2</span>
+            <span class="card-label">Incoming Shipments</span>
+          </div>
+        </div>
+        <div class="summary-card green">
+          <div class="card-icon">🏗️</div>
+          <div class="card-info">
+            <span class="card-number">850</span>
+            <span class="card-label">kg In Stock</span>
+          </div>
+        </div>
+        <div class="summary-card orange">
+          <div class="card-icon">🚚</div>
+          <div class="card-info">
+            <span class="card-number">5</span>
+            <span class="card-label">Dispatched This Month</span>
+          </div>
+        </div>
+        <div class="summary-card red">
+          <div class="card-icon">🚨</div>
+          <div class="card-info">
+            <span class="card-number">1</span>
+            <span class="card-label">Pending Scans</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-section">
+        <div class="table-header">
+          <h3>Incoming Shipments</h3>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Batch ID</th>
+              <th>Chemical</th>
+              <th>Qty (kg)</th>
+              <th>From</th>
+              <th>ETA</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CHEM001-D02</strong></td>
+              <td>Acetic Anhydride</td>
+              <td>100</td>
+              <td>XYZ Chemicals</td>
+              <td>Today</td>
+              <td><span class="status-badge pending">IN TRANSIT</span></td>
+              <td><button class="btn-sm green" onclick="showSection('dist-receive',null)">Receive</button></td>
+            </tr>
+            <tr>
+              <td><strong>CHEM003-D01</strong></td>
+              <td>Ephedrine</td>
+              <td>50</td>
+              <td>ABC Supplier</td>
+              <td>22/02/2026</td>
+              <td><span class="status-badge blue">EXPECTED</span></td>
+              <td><button class="btn-sm blue">Track</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DIST RECEIVE -->
+    <div class="content-section" id="section-dist-receive">
+      <div class="section-header">
+        <h1>Receive Chemical</h1>
+        <span class="section-desc">Scan QR and confirm received quantity</span>
+      </div>
+
+      <div class="form-card">
+        <div class="scan-box" onclick="simulateDistScan()">
+          <span class="scan-icon">📷</span>
+          <p class="scan-text">Scan Drum QR Code</p>
+          <p class="scan-sub">Point camera at QR code on drum</p>
+        </div>
+
+        <div id="dist-receive-form" style="display:none;">
+          <div class="scanned-result">
+            ✅ QR Scanned: <strong>CHEM001-D02</strong> |
+            Expected: 100kg Acetic Anhydride from XYZ Chemicals
+          </div>
+
+          <div class="section-divider">📦 Confirm Receipt</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Quantity Received (kg) <span>*</span></label>
+              <input type="number" class="form-input" placeholder="Enter actual quantity received"
+                     oninput="checkMismatch(this.value)"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Condition of Drums</label>
+              <select class="form-input">
+                <option>Good — No damage</option>
+                <option>Minor damage — Sealed</option>
+                <option>Damaged — Report filed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mismatch-alert" id="mismatch-alert" style="display:none;">
+            ⚠️ QUANTITY MISMATCH DETECTED — NCB will be automatically alerted!
+          </div>
+
+          <div class="gps-capture">
+            <span>📍</span>
+            <div>
+              <p style="font-weight:600;font-size:0.88rem;">GPS Auto-Captured</p>
+              <p style="font-size:0.78rem;color:var(--gray);">28.4089° N, 77.3178° E — Faridabad, Haryana</p>
+            </div>
+            <span style="color:var(--green);font-weight:700;">✓</span>
+          </div>
+
+          <button class="btn-submit green"
+                  onclick="showToast('✅ Receipt confirmed! Stock updated. Blockchain record created.','success')">
+            ✅ Confirm Receipt
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIST INVENTORY -->
+    <div class="content-section" id="section-dist-inventory">
+      <div class="section-header">
+        <h1>My Inventory</h1>
+        <span class="section-desc">Current chemical stock with batch breakdown</span>
+      </div>
+      <div class="table-section">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Chemical</th>
+              <th>Batch ID</th>
+              <th>Received (kg)</th>
+              <th>Forwarded (kg)</th>
+              <th>Remaining (kg)</th>
+              <th>Received On</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Acetic Anhydride</td>
+              <td>CHEM001-D01</td>
+              <td>100</td>
+              <td>60</td>
+              <td><strong>40</strong></td>
+              <td>20/02/2026</td>
+              <td><span class="status-badge approved">IN STOCK</span></td>
+            </tr>
+            <tr>
+              <td>Ephedrine</td>
+              <td>CHEM002-D03</td>
+              <td>200</td>
+              <td>200</td>
+              <td><strong style="color:var(--red)">0</strong></td>
+              <td>18/02/2026</td>
+              <td><span class="status-badge delivered">FULLY FORWARDED</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DIST FORWARD -->
+    <div class="content-section" id="section-dist-forward">
+      <div class="section-header">
+        <h1>Forward / Dispatch Chemical</h1>
+        <span class="section-desc">Split and forward chemical to next party</span>
+      </div>
+
+      <div class="info-box orange">
+        🔲 <strong>QR Split:</strong> When you forward a partial quantity,
+        the original child QR splits into two new QRs — one for forwarded qty,
+        one for remaining. Both linked to parent on blockchain.
+      </div>
+
+      <div class="form-card" style="margin-top:1.5rem;">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Select From Inventory <span>*</span></label>
+            <select class="form-input">
+              <option>CHEM001-D01 — Acetic Anhydride — 40kg remaining</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Forward To (URN) <span>*</span></label>
+            <input type="text" class="form-input" placeholder="Recipient URN number"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Quantity to Forward (kg) <span>*</span></label>
+            <input type="number" class="form-input" placeholder="e.g. 20" max="40"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vehicle Number <span>*</span></label>
+            <input type="text" class="form-input" placeholder="HR 26 XX 1234"/>
+          </div>
+        </div>
+
+        <div class="gps-capture">
+          <span>📍</span>
+          <div>
+            <p style="font-weight:600;font-size:0.88rem;">GPS Auto-Captured at Dispatch</p>
+            <p style="font-size:0.78rem;color:var(--gray);">28.4089° N, 77.3178° E</p>
+          </div>
+          <span style="color:var(--green);font-weight:700;">✓</span>
+        </div>
+
+        <button class="btn-submit orange"
+                onclick="showToast('✅ Chemical forwarded! New child QRs generated. Blockchain updated.','success')">
+          🚚 Confirm Forward & Generate Split QR
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         CONSUMER SECTIONS
+    ══════════════════════════════ -->
+
+    <!-- CONSUMER DASHBOARD -->
+    <div class="content-section" id="section-con-dashboard">
+      <div class="section-header">
+        <h1>Consumer Dashboard</h1>
+        <span class="live-badge">● LIVE</span>
+      </div>
+      <div class="cards-grid">
+        <div class="summary-card blue">
+          <div class="card-icon">📥</div>
+          <div class="card-info">
+            <span class="card-number">1</span>
+            <span class="card-label">Pending Delivery</span>
+          </div>
+        </div>
+        <div class="summary-card green">
+          <div class="card-icon">🏗️</div>
+          <div class="card-info">
+            <span class="card-number">450</span>
+            <span class="card-label">kg In Stock</span>
+          </div>
+        </div>
+        <div class="summary-card orange">
+          <div class="card-icon">📊</div>
+          <div class="card-info">
+            <span class="card-number">⚠️</span>
+            <span class="card-label">Monthly Log Pending</span>
+          </div>
+        </div>
+        <div class="summary-card green">
+          <div class="card-icon">✅</div>
+          <div class="card-info">
+            <span class="card-number">100%</span>
+            <span class="card-label">Compliance Score</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="compliance-warn">
+        ⚠️ February 2026 Usage Log is pending. Submit before 28th Feb to avoid compliance flag.
+        <button class="btn-sm orange" style="margin-left:1rem;"
+                onclick="showSection('con-usage',null)">Submit Now →</button>
+      </div>
+    </div>
+
+    <!-- CONSUMER RECEIVE -->
+    <div class="content-section" id="section-con-receive">
+      <div class="section-header">
+        <h1>Receive Chemical Delivery</h1>
+        <span class="section-desc">Scan QR and confirm final receipt</span>
+      </div>
+
+      <div class="form-card">
+        <div class="scan-box" onclick="simulateConScan()">
+          <span class="scan-icon">📷</span>
+          <p class="scan-text">Scan Delivery QR Code</p>
+          <p class="scan-sub">Point camera at QR on drum</p>
+        </div>
+
+        <div id="con-receive-form" style="display:none;">
+          <div class="scanned-result">
+            ✅ QR Scanned: <strong>CHEM001-D01-SPLIT-A</strong> |
+            Expected: 60kg Acetic Anhydride from ABC Distributor
+          </div>
+
+          <div class="form-row" style="margin-top:1.5rem;">
+            <div class="form-group">
+              <label class="form-label">Actual Quantity Received (kg) <span>*</span></label>
+              <input type="number" class="form-input" placeholder="Enter received quantity"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Receiving Officer Name <span>*</span></label>
+              <input type="text" class="form-input" placeholder="Officer/Pharmacist name"/>
+            </div>
+          </div>
+
+          <div class="gps-capture">
+            <span>📍</span>
+            <div>
+              <p style="font-weight:600;font-size:0.88rem;">GPS Auto-Captured</p>
+              <p style="font-size:0.78rem;color:var(--gray);">28.4089° N, 77.3178° E</p>
+            </div>
+            <span style="color:var(--green);font-weight:700;">✓</span>
+          </div>
+
+          <button class="btn-submit green"
+                  onclick="showToast('✅ Delivery confirmed! Stock updated. Chain of custody complete.','success')">
+            ✅ Confirm Receipt — Complete Chain of Custody
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONSUMER USAGE LOG -->
+    <div class="content-section" id="section-con-usage">
+      <div class="section-header">
+        <h1>Monthly Usage Log</h1>
+        <span class="section-desc">Submit how much chemical was used and what was produced</span>
+      </div>
+
+      <div class="form-card">
+        <div class="info-box blue">
+          ℹ️ <strong>Mass Balance Check:</strong> System will automatically verify your
+          chemical usage against expected medicine/product output. Mismatch triggers NCB alert.
+        </div>
+
+        <div class="section-divider">📅 Log Period</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Month <span>*</span></label>
+            <select class="form-input">
+              <option>February 2026</option>
+              <option>January 2026</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Chemical Used <span>*</span></label>
+            <select class="form-input">
+              <option>Acetic Anhydride</option>
+              <option>Ephedrine</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Opening Stock (kg)</label>
+            <input type="number" class="form-input" value="500" readonly
+                   style="background:#f0f3f6"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Chemical Used This Month (kg) <span>*</span></label>
+            <input type="number" class="form-input" placeholder="e.g. 100"
+                   oninput="calcMassBalance(this.value)"/>
+          </div>
+        </div>
+
+        <div class="section-divider">💊 Production Output</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Medicine / Product Name <span>*</span></label>
+            <input type="text" class="form-input" placeholder="e.g. Paracetamol 500mg"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Units Produced <span>*</span></label>
+            <input type="number" class="form-input" placeholder="e.g. 10000"
+                   oninput="calcMassBalance2(this.value)"/>
+          </div>
+        </div>
+
+        <!-- MASS BALANCE RESULT -->
+        <div class="mass-balance-box" id="mass-balance-result" style="display:none;">
+          <div class="mb-header">⚖️ Mass Balance Verification</div>
+          <div class="mb-body">
+            <div class="mb-row">
+              <span>Chemical Used:</span>
+              <span id="mb-used">—</span>
+            </div>
+            <div class="mb-row">
+              <span>Expected Output (formula):</span>
+              <span id="mb-expected">—</span>
+            </div>
+            <div class="mb-row">
+              <span>Actual Output:</span>
+              <span id="mb-actual">—</span>
+            </div>
+            <div class="mb-row result" id="mb-result-row">
+              <span>Status:</span>
+              <span id="mb-status">—</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-submit orange"
+                onclick="showToast('✅ Usage log submitted! NCB quarterly report updated.','success')">
+          Submit Monthly Log
+        </button>
+      </div>
+    </div>
+
+    <!-- CONSUMER STOCK -->
+    <div class="content-section" id="section-con-stock">
+      <div class="section-header">
+        <h1>My Chemical Stock</h1>
+        <span class="section-desc">Current inventory with usage history</span>
+      </div>
+      <div class="table-section">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Chemical</th>
+              <th>Received (kg)</th>
+              <th>Used (kg)</th>
+              <th>Remaining (kg)</th>
+              <th>Last Updated</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Acetic Anhydride</td>
+              <td>500</td>
+              <td>50</td>
+              <td><strong>450</strong></td>
+              <td>20/02/2026</td>
+              <td><span class="status-badge approved">IN STOCK</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         COMMON SECTIONS
+    ══════════════════════════════ -->
+
+    <!-- ALERTS -->
+    <div class="content-section" id="section-alerts">
+      <div class="section-header">
+        <h1>My Alerts</h1>
+        <span class="section-desc">Alerts related to your firm</span>
+      </div>
+      <div class="empty-state">
+        <span>✅</span>
+        <p>No active alerts</p>
+        <p style="font-size:0.82rem;color:var(--gray);">Your chemical movements are all normal</p>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="content-section" id="section-profile">
+      <div class="section-header">
+        <h1>My Profile</h1>
+        <span class="section-desc">Firm details and license information</span>
+      </div>
+      <div class="form-card">
+        <div class="profile-header">
+          <div class="profile-avatar" id="profile-avatar">🏭</div>
+          <div>
+            <h2 id="profile-name">Company Name</h2>
+            <p id="profile-role-text" style="color:var(--orange);font-weight:600;"></p>
+            <span class="status-badge approved">NCB APPROVED</span>
+          </div>
+        </div>
+
+        <div class="section-divider">📋 Account Details</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Registered Email</label>
+            <input type="email" class="form-input" id="profile-email" readonly
+                   style="background:#f0f3f6"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <input type="text" class="form-input" id="profile-cat" readonly
+                   style="background:#f0f3f6;text-transform:capitalize"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">URN Status</label>
+          <input type="text" class="form-input" value="Active — Verified by NCB" readonly
+                 style="background:#f0f3f6;color:var(--green);font-weight:600;"/>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>

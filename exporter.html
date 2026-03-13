@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exporter Dashboard — ChemTrack India</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="supplier.css"/>
+</head>
+<body>
+
+<!-- SESSION CHECK -->
+<script>
+  const _sess = localStorage.getItem('chemtrack_session');
+  if (!_sess) { window.location.href = 'login.html'; }
+  else {
+    const _s = JSON.parse(_sess);
+    if (_s.role !== 'exporter' || _s.status !== 'approved') {
+      window.location.href = 'login.html';
+    }
+  }
+</script>
+
+<!-- NAVBAR -->
+<nav class="dash-navbar">
+  <div class="nav-left">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <img src="logo.png" class="nav-logo"/>
+    <div class="nav-title">
+      <span>ChemTrack India</span>
+      <span>Exporter Portal</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info">
+      <span class="nav-user-name" id="nav-company-name">Loading...</span>
+      <span class="nav-user-role">✈️ Exporter</span>
+    </div>
+    <button class="nav-logout" onclick="exporterLogout()">Logout 🚪</button>
+  </div>
+</nav>
+
+<!-- TRICOLOR -->
+<div class="tricolor-bar">
+  <span></span><span></span><span></span>
+</div>
+
+<!-- LAYOUT -->
+<div class="dash-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+
+      <li>
+        <a href="#" class="sidebar-item active"
+           onclick="showSection('dashboard',this); return false;">
+          <span class="s-icon">📊</span>
+          <span class="s-text">Dashboard</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('inventory',this); return false;">
+          <span class="s-icon">📦</span>
+          <span class="s-text">My Inventory</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('export-dispatch',this); return false;">
+          <span class="s-icon">✈️</span>
+          <span class="s-text">Export Dispatch</span>
+          <span class="s-badge" id="badge-export" style="display:none;">0</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('export-log',this); return false;">
+          <span class="s-icon">🌍</span>
+          <span class="s-text">Export Log</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('qr',this); return false;">
+          <span class="s-icon">🔲</span>
+          <span class="s-text">QR Manager</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('scan-qr',this); return false;">
+          <span class="s-icon">📷</span>
+          <span class="s-text">Scan Barcode</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('compliance',this); return false;">
+          <span class="s-icon">✅</span>
+          <span class="s-text">Compliance</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="sidebar-item"
+           onclick="showSection('profile',this); return false;">
+          <span class="s-icon">🏢</span>
+          <span class="s-text">My Profile</span>
+        </a>
+      </li>
+
+    </ul>
+    <div class="sidebar-footer">
+      <p>🇮🇳 NCB Approved Exporter</p>
+      <p id="sidebar-urn">URN: Loading...</p>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="dash-main">
+
+    <!-- DASHBOARD -->
+    <div class="content-section active" id="section-dashboard">
+      <div class="section-header">
+        <div>
+          <h1 id="welcome-msg">Welcome, Exporter</h1>
+          <p class="section-desc" id="welcome-sub">NCB Approved — Exporter Portal | DGFT & Customs Integrated</p>
+        </div>
+        <span class="approved-badge">✅ NCB APPROVED</span>
+      </div>
+
+      <div class="cards-grid">
+        <div class="summary-card orange">
+          <div class="card-icon">📦</div>
+          <div class="card-info">
+            <span class="card-number" id="stat-stock">0</span>
+            <span class="card-label">Total Stock (kg)</span>
+          </div>
+        </div>
+        <div class="summary-card green">
+          <div class="card-icon">✈️</div>
+          <div class="card-info">
+            <span class="card-number" id="stat-exported">0</span>
+            <span class="card-label">Total Exported (kg)</span>
+          </div>
+        </div>
+        <div class="summary-card blue">
+          <div class="card-icon">🌍</div>
+          <div class="card-info">
+            <span class="card-number" id="stat-countries">0</span>
+            <span class="card-label">Countries Exported</span>
+          </div>
+        </div>
+        <div class="summary-card navy">
+          <div class="card-icon">📋</div>
+          <div class="card-info">
+            <span class="card-number" id="stat-pending">0</span>
+            <span class="card-label">Pending Approvals</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="qa-grid">
+          <button class="qa-btn orange" onclick="showSection('export-dispatch', document.querySelector('[onclick*=export-dispatch]'))">✈️ New Export Dispatch</button>
+          <button class="qa-btn green"  onclick="showSection('inventory', document.querySelector('[onclick*=inventory]'))">📦 View Inventory</button>
+          <button class="qa-btn blue"   onclick="showSection('export-log', document.querySelector('[onclick*=export-log]'))">🌍 Export Log</button>
+          <button class="qa-btn navy"   onclick="showSection('qr', document.querySelector('[onclick*=qr]'))">🔲 QR Manager</button>
+        </div>
+      </div>
+
+      <div class="table-section">
+        <div class="table-header"><h3>Recent Export Dispatches</h3></div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Export ID</th><th>Material</th><th>Quantity (kg)</th>
+              <th>Destination</th><th>Port</th><th>Date</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="recent-export-tbody">
+            <tr><td colspan="7" class="empty-td">No exports yet. Create a new export dispatch.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="content-section" id="section-inventory">
+      <div class="section-header">
+        <h1>My Inventory</h1>
+        <span class="section-desc">Current stock of chemicals approved for export</span>
+      </div>
+      <div class="action-bar">
+        <button class="btn-primary" onclick="openAddStock()">+ Add Stock Entry</button>
+      </div>
+      <div class="table-section">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Chemical Name</th><th>Stock (kg)</th>
+              <th>Price (₹/kg)</th><th>NCB Permit No.</th><th>Added On</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-tbody">
+            <tr><td colspan="7" class="empty-td">No inventory added yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EXPORT DISPATCH -->
+    <div class="content-section" id="section-export-dispatch">
+      <div class="section-header">
+        <h1>Export Dispatch</h1>
+        <span class="section-desc">Dispatch chemicals for export — IEC + DGFT + NCB tracked</span>
+      </div>
+
+      <div class="qr-info-box" style="background:rgba(19,44,84,0.04);border-color:rgba(19,44,84,0.2);">
+        <span class="qr-info-icon">🏛️</span>
+        <div>
+          <p style="font-size:0.9rem;font-weight:600;color:var(--navy);">DGFT & Customs Integration Active</p>
+          <p style="font-size:0.82rem;color:var(--gray);margin-top:4px;">Every export is auto-linked to your IEC code and forwarded to DGFT + NCB. Ensure DGFT NOC is obtained before dispatch.</p>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3 class="form-card-title">✈️ New Export Dispatch Entry</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Chemical / Material Name <span class="req">*</span></label>
+            <input type="text" class="form-input" id="ex-material" placeholder="e.g. Acetic Anhydride"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quantity (kg) <span class="req">*</span></label>
+            <input type="number" class="form-input" id="ex-qty" placeholder="e.g. 2000"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Chemical Composition / CAS No. <span class="req">*</span></label>
+            <input type="text" class="form-input" id="ex-chemicals" placeholder="e.g. (CH3CO)2O, CAS 108-24-7"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Destination Country <span class="req">*</span></label>
+            <select class="form-input" id="ex-country">
+              <option value="">-- Select Country --</option>
+              <option>USA</option><option>Germany</option><option>Japan</option>
+              <option>UK</option><option>France</option><option>Australia</option>
+              <option>Canada</option><option>Singapore</option><option>UAE</option>
+              <option>South Korea</option><option>Netherlands</option><option>Switzerland</option>
+              <option>Italy</option><option>Spain</option><option>Brazil</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Importing Firm Name <span class="req">*</span></label>
+            <input type="text" class="form-input" id="ex-importer" placeholder="Foreign buyer company name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Import License No. (Foreign Buyer)</label>
+            <input type="text" class="form-input" id="ex-import-license" placeholder="Buyer's import permit no."/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">IEC Code <span class="req">*</span></label>
+            <input type="text" class="form-input" id="ex-iec" placeholder="Import Export Code"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">DGFT NOC Number <span class="req">*</span></label>
+            <input type="text" class="form-input" id="ex-dgft" placeholder="DGFT No-Objection Certificate no."/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Shipping Line / Airline</label>
+            <input type="text" class="form-input" id="ex-shipping" placeholder="e.g. Maersk / Air India Cargo"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bill of Lading / AWB No.</label>
+            <input type="text" class="form-input" id="ex-bol" placeholder="Shipping document no."/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Port of Export <span class="req">*</span></label>
+            <select class="form-input" id="ex-port">
+              <option value="">-- Select Port --</option>
+              <option>JNPT, Mumbai</option><option>Chennai Port</option>
+              <option>Mundra Port, Gujarat</option><option>Kolkata Port</option>
+              <option>Kochi Port</option><option>Vizag Port</option>
+              <option>IGI Airport, Delhi</option><option>CSIA Airport, Mumbai</option>
+              <option>Bengaluru Airport</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Expected Export Date <span class="req">*</span></label>
+            <input type="date" class="form-input" id="ex-date"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Remarks / Additional Notes</label>
+          <input type="text" class="form-input" id="ex-remarks" placeholder="Any special handling or routing notes..."/>
+        </div>
+
+        <div class="gps-box" id="gps-box">
+          <span>📍</span>
+          <span id="gps-status">GPS will be captured automatically at dispatch</span>
+          <button class="btn-gps" onclick="captureGPS()">📡 Capture GPS</button>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-secondary" onclick="clearExportForm()">Clear Form</button>
+          <button class="btn-primary" onclick="submitExport()">✈️ Submit Export & Generate QR</button>
+        </div>
+        <div id="export-alert" class="alert"></div>
+
+        <!-- QR RESULT PANEL -->
+        <div id="qr-result-panel" style="display:none;margin-top:1.5rem;background:linear-gradient(135deg,#f0f7ff,#e8f5e9);border:2px solid #2d7a4f;border-radius:12px;padding:1.5rem">
+          <h4 style="color:#2d7a4f;margin:0 0 1rem">✅ Export QR Code Generated Successfully</h4>
+          <div style="display:grid;grid-template-columns:170px 1fr;gap:1.5rem;align-items:start">
+            <div id="qr-result-canvas"></div>
+            <div>
+              <p style="margin:0.3rem 0;font-size:0.88rem"><strong>Export ID:</strong><br/>
+                <code id="qr-result-id" style="font-family:monospace;font-size:0.72rem;background:#f0f4ff;color:#132C54;padding:2px 6px;border-radius:4px;word-break:break-all"></code>
+              </p>
+              <p style="margin:0.3rem 0;font-size:0.88rem"><strong>Material:</strong> <span id="qr-result-material"></span></p>
+              <p style="margin:0.3rem 0;font-size:0.88rem"><strong>Destination:</strong> <span id="qr-result-country"></span></p>
+              <p style="margin:0.3rem 0;font-size:0.88rem"><strong>GPS:</strong> 📍 <span id="qr-result-gps"></span></p>
+              <div style="margin-top:0.8rem;padding:8px 12px;background:rgba(19,44,84,0.05);border-radius:6px;font-size:0.78rem;color:var(--gray)">
+                🏛️ Auto-notified: NCB Admin + DGFT + Customs
+              </div>
+              <button onclick="printQR(document.getElementById('qr-result-id').textContent)"
+                style="margin-top:0.5rem;padding:6px 14px;background:#132C54;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.82rem">
+                🖨️ Print Export QR
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPORT LOG -->
+    <div class="content-section" id="section-export-log">
+      <div class="section-header">
+        <h1>Export Log</h1>
+        <span class="section-desc">Country-wise export records — DGFT & NCB synchronized</span>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" class="filter-input" placeholder="Search by material, country, export ID..." oninput="searchExportLog(this.value)"/>
+        <select class="filter-select" onchange="filterExportLog(this.value)">
+          <option value="all">All Countries</option>
+          <option>USA</option><option>Germany</option><option>Japan</option><option>UK</option><option>Other</option>
+        </select>
+        <select class="filter-select" onchange="filterExportStatus(this.value)">
+          <option value="all">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="exported">Exported</option>
+          <option value="delivered">Delivered</option>
+        </select>
+      </div>
+
+      <div class="table-section">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Export ID</th><th>Material</th><th>Qty (kg)</th>
+              <th>Country</th><th>Port</th><th>DGFT NOC</th><th>Date</th><th>Status</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="export-log-tbody">
+            <tr><td colspan="10" class="empty-td">No export records yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-section" style="margin-top:2rem">
+        <div class="table-header"><h3>🌍 Country-wise Export Summary</h3></div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Country</th><th>Total Shipments</th><th>Total Qty (kg)</th><th>Last Export</th></tr>
+          </thead>
+          <tbody id="country-summary-tbody">
+            <tr><td colspan="4" class="empty-td">No exports recorded yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- QR MANAGER -->
+    <div class="content-section" id="section-qr">
+      <div class="section-header">
+        <h1>QR Manager</h1>
+        <span class="section-desc">Export QR codes linked to NCB blockchain</span>
+      </div>
+      <div class="qr-info-box">
+        <span class="qr-info-icon">ℹ️</span>
+        <div>
+          <p>Each export dispatch generates an <strong>Export QR Code</strong> linked to NCB blockchain + DGFT records.</p>
+          <p style="font-size:0.82rem;color:var(--gray);margin-top:4px;">Customs can scan to verify. Quantity mismatch triggers immediate NCB alert.</p>
+        </div>
+      </div>
+      <div class="table-section">
+        <div class="table-header"><h3>Generated Export QR Codes</h3></div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>QR / Export ID</th><th>Material</th><th>Qty (kg)</th>
+              <th>Destination</th><th>Generated On</th><th>Status</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="qr-tbody">
+            <tr><td colspan="7" class="empty-td">No QR codes generated yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SCAN QR -->
+    <div class="content-section" id="section-scan-qr">
+      <div class="section-header">
+        <h1>Scan / Verify Barcode</h1>
+        <span class="section-desc">Enter barcode ID to verify export chain</span>
+      </div>
+      <div class="form-card">
+        <h3 class="form-card-title">Enter Barcode / Export ID</h3>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+          <input type="text" id="scan-input" class="form-input" style="flex:1" placeholder="e.g. EXP-XXXXXX-XXXXX"/>
+          <button class="btn-primary" onclick="scanQR()">Verify</button>
+        </div>
+        <div id="scan-result"></div>
+      </div>
+    </div>
+
+    <!-- COMPLIANCE -->
+    <div class="content-section" id="section-compliance">
+      <div class="section-header">
+        <h1>Compliance Status</h1>
+        <span class="section-desc">NCB, DGFT & Customs compliance overview</span>
+      </div>
+      <div class="compliance-grid">
+        <div class="compliance-card green">
+          <div class="comp-icon">✅</div>
+          <div class="comp-info"><span class="comp-title">NCB Registration</span><span class="comp-value green-text">APPROVED</span></div>
+        </div>
+        <div class="compliance-card green">
+          <div class="comp-icon">🏛️</div>
+          <div class="comp-info"><span class="comp-title">DGFT Status</span><span class="comp-value green-text">IEC ACTIVE</span></div>
+        </div>
+        <div class="compliance-card orange">
+          <div class="comp-icon">📊</div>
+          <div class="comp-info"><span class="comp-title">Compliance Score</span><span class="comp-value orange-text" id="comp-score">100%</span></div>
+        </div>
+        <div class="compliance-card blue">
+          <div class="comp-icon">🔗</div>
+          <div class="comp-info"><span class="comp-title">Blockchain Records</span><span class="comp-value blue-text" id="comp-blockchain">0 entries</span></div>
+        </div>
+      </div>
+      <div class="compliance-rules">
+        <h3>NCB & DGFT Compliance Rules for Exporters</h3>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>Valid IEC (Import Export Code) mandatory for all exports</span></div>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>DGFT No-Objection Certificate required for each export batch</span></div>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>QR code must be physically attached to every export shipment</span></div>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>Customs declaration must match QR-encoded chemical quantity</span></div>
+        <div class="rule-item"><span class="rule-icon green-text">✅</span><span>GPS capture mandatory at port of export</span></div>
+        <div class="rule-item"><span class="rule-icon orange-text">⚠️</span><span>Annual export report must be submitted to NCB by March 31</span></div>
+        <div class="rule-item"><span class="rule-icon orange-text">⚠️</span><span>Any export to flagged countries requires special NCB clearance</span></div>
+        <div class="rule-item"><span class="rule-icon" style="color:var(--red)">❗</span><span>Quantity mismatch ≥15% triggers immediate NCB + Customs alert</span></div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="content-section" id="section-profile">
+      <div class="section-header">
+        <h1>My Profile</h1>
+        <span class="section-desc">Your registered exporter firm details</span>
+      </div>
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="profile-avatar">✈️</div>
+          <div>
+            <h2 id="prof-company">—</h2>
+            <span class="cat-badge">✈️ Exporter</span>
+            <span class="status-badge approved" style="margin-left:8px;">✅ APPROVED</span>
+          </div>
+        </div>
+        <div class="profile-grid">
+          <div class="profile-field"><label>📧 Email</label><span id="prof-email">—</span></div>
+          <div class="profile-field"><label>📞 Phone</label><span id="prof-phone">—</span></div>
+          <div class="profile-field"><label>🏢 Company Name</label><span id="prof-company2">—</span></div>
+          <div class="profile-field"><label>👤 Owner Name</label><span id="prof-owner">—</span></div>
+          <div class="profile-field"><label>💼 Designation</label><span id="prof-designation">—</span></div>
+          <div class="profile-field"><label>📍 State</label><span id="prof-state">—</span></div>
+          <div class="profile-field"><label>🏙️ City</label><span id="prof-city">—</span></div>
+          <div class="profile-field"><label>🪪 GST No.</label><span id="prof-gst">—</span></div>
+          <div class="profile-field"><label>🏛️ URN No.</label><span id="prof-urn">—</span></div>
+          <div class="profile-field"><label>📋 PAN</label><span id="prof-pan">—</span></div>
+          <div class="profile-field"><label>🛂 IEC Code</label><span id="prof-iec">—</span></div>
+          <div class="profile-field"><label>🏛️ DGFT No.</label><span id="prof-dgft">—</span></div>
+          <div class="profile-field"><label>🌍 Export Countries</label><span id="prof-countries">—</span></div>
+          <div class="profile-field"><label>📦 Annual Volume</label><span id="prof-volume">—</span></div>
+          <div class="profile-field"><label>📅 Registered On</label><span id="prof-registered">—</span></div>
+          <div class="profile-field"><label>✅ Approved On</label><span id="prof-approved">—</span></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ADD STOCK MODAL -->
+<div class="modal-overlay" id="stock-modal">
+  <div class="modal">
+    <div class="modal-header orange">
+      <h3>📦 Add Stock Entry</h3>
+      <button onclick="closeModal('stock-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Chemical Name <span class="req">*</span></label>
+        <input type="text" class="form-input" id="stock-material" placeholder="e.g. Acetic Anhydride"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Quantity (kg) <span class="req">*</span></label>
+        <input type="number" class="form-input" id="stock-qty" placeholder="e.g. 5000"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">NCB Permit No.</label>
+        <input type="text" class="form-input" id="stock-permit" placeholder="NCB storage permit number"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Unit Price (₹/kg)</label>
+        <input type="number" class="form-input" id="stock-price" placeholder="e.g. 450"/>
+      </div>
+      <div id="stock-alert" class="alert"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeModal('stock-modal')">Cancel</button>
+      <button class="btn-modal-confirm orange" onclick="saveStock()">+ Add Stock</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAIN MODAL -->
+<div class="modal-overlay" id="chain-modal">
+  <div style="background:#fff;border-radius:14px;max-width:680px;width:95vw;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;border-bottom:2px solid #e0e8f4">
+      <h3 style="margin:0;color:#132C54">Export Chain — <span id="chain-modal-id"></span></h3>
+      <button onclick="closeModal('chain-modal')" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666">✕</button>
+    </div>
+    <div style="padding:1.5rem">
+      <p style="color:#666;margin-bottom:0.5rem"><strong>Material:</strong> <span id="chain-modal-material"></span></p>
+      <div style="display:flex;justify-content:center;margin:0.5rem 0"><div id="chain-modal-qr"></div></div>
+      <div id="chain-modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="barcode-engine.js"></script>
+<script src="exporter.js"></script>
+</body>
+</html>

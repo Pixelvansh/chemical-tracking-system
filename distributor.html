@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Distributor Dashboard — ChemTrack India</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="stylesheet" href="supplier.css"/>
+  <link rel="stylesheet" href="manufacturer.css"/>
+</head>
+<body>
+<script>
+  const _sess = localStorage.getItem('chemtrack_session');
+  if (!_sess) { window.location.href = 'login.html'; }
+  else {
+    const _s = JSON.parse(_sess);
+    if (_s.role !== 'distributor' || _s.status !== 'approved') window.location.href = 'login.html';
+  }
+</script>
+
+<nav class="dash-navbar">
+  <div class="nav-left">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <img src="logo.png" class="nav-logo"/>
+    <div class="nav-title"><span>ChemTrack India</span><span>Distributor Portal</span></div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info">
+      <span class="nav-user-name" id="nav-company-name">Loading...</span>
+      <span class="nav-user-role">🚚 Distributor</span>
+    </div>
+    <button class="nav-logout" onclick="distLogout()">Logout 🚪</button>
+  </div>
+</nav>
+<div class="tricolor-bar"><span></span><span></span><span></span></div>
+
+<div class="dash-layout">
+  <aside class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+      <li><a href="#" class="sidebar-item active" onclick="showSection('dashboard',this);return false;"><span class="s-icon">📊</span><span class="s-text">Dashboard</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('order-mfr',this);return false;"><span class="s-icon">📝</span><span class="s-text">Order from Manufacturer</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('retail-orders',this);return false;"><span class="s-icon">🛒</span><span class="s-text">Retailer Orders</span><span class="s-badge" id="badge-retail-orders" style="display:none">0</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('receive',this);return false;"><span class="s-icon">📥</span><span class="s-text">Receive Shipment</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('inventory',this);return false;"><span class="s-icon">🏪</span><span class="s-text">My Inventory</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('split',this);return false;"><span class="s-icon">✂️</span><span class="s-text">Split & Dispatch</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('qr',this);return false;"><span class="s-icon">🔲</span><span class="s-text">QR Manager</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('scan',this);return false;"><span class="s-icon">📷</span><span class="s-text">Scan Barcode</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('history',this);return false;"><span class="s-icon">📜</span><span class="s-text">History</span></a></li>
+      <li><a href="#" class="sidebar-item" onclick="showSection('profile',this);return false;"><span class="s-icon">🏢</span><span class="s-text">Profile</span></a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>🇮🇳 NCB Approved</p>
+      <p id="sidebar-urn">URN: Loading...</p>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+
+    <!-- DASHBOARD -->
+    <div class="content-section active" id="section-dashboard">
+      <div class="section-header">
+        <div><h1 id="welcome-msg">Welcome, Distributor</h1><p class="section-desc" id="welcome-sub">NCB Approved — Distributor Portal</p></div>
+        <span class="approved-badge">✅ NCB APPROVED</span>
+      </div>
+      <div class="cards-grid">
+        <div class="summary-card orange"><div class="card-icon">📦</div><div class="card-info"><span class="card-number" id="stat-stock">0 kg</span><span class="card-label">Stock in Hand</span></div></div>
+        <div class="summary-card green"><div class="card-icon">✅</div><div class="card-info"><span class="card-number" id="stat-received">0</span><span class="card-label">Batches Received</span></div></div>
+        <div class="summary-card blue"><div class="card-icon">✂️</div><div class="card-info"><span class="card-number" id="stat-splits">0</span><span class="card-label">Splits Done</span></div></div>
+        <div class="summary-card navy"><div class="card-icon">🏪</div><div class="card-info"><span class="card-number" id="stat-retailers">0</span><span class="card-label">Retailers Served</span></div></div>
+      </div>
+      <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="action-btns">
+          <button class="action-btn" onclick="showSection('order-mfr',this)"><span>📝</span><span>Order from Mfr</span></button>
+          <button class="action-btn" onclick="showSection('retail-orders',this)"><span>🛒</span><span>Retailer Orders</span></button>
+          <button class="action-btn" onclick="showSection('receive',this)"><span>📥</span><span>Receive Shipment</span></button>
+          <button class="action-btn" onclick="showSection('split',this)"><span>✂️</span><span>Split & Dispatch</span></button>
+        </div>
+      </div>
+      <div class="table-section">
+        <div class="table-header"><h3>Recent Activity</h3></div>
+        <table class="data-table">
+          <thead><tr><th>ID</th><th>Material</th><th>Qty</th><th>Action</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="recent-tbody"><tr><td colspan="6" class="empty-td">No activity yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ORDER FROM MANUFACTURER (NAYA) -->
+    <div class="content-section" id="section-order-mfr">
+      <div class="section-header"><div><h1>📝 Order from Manufacturer</h1><p class="section-desc">Request chemicals from NCB-approved manufacturers</p></div></div>
+      <div class="form-card">
+        <h3 class="form-card-title">📋 New Order Request</h3>
+        <div class="alert" id="mfr-req-alert"></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Material Name <span class="req">*</span></label><input type="text" id="mfr-req-material" class="form-input" placeholder="e.g. Acetic Acid"/></div>
+          <div class="form-group"><label>Quantity (kg) <span class="req">*</span></label><input type="number" id="mfr-req-qty" class="form-input" placeholder="e.g. 200"/></div>
+          <div class="form-group"><label>Chemical Components</label><input type="text" id="mfr-req-chemicals" class="form-input" placeholder="e.g. CH3COOH 99%"/></div>
+          <div class="form-group"><label>Manufacturer Name <span class="req">*</span></label><input type="text" id="mfr-req-mfr-name" class="form-input" placeholder="Manufacturer company name"/></div>
+          <div class="form-group"><label>Manufacturer Email</label><input type="email" id="mfr-req-mfr-email" class="form-input" placeholder="mfr@example.com"/></div>
+          <div class="form-group full-span"><label>Notes / Requirements</label><textarea id="mfr-req-notes" class="form-input" rows="2" placeholder="Any special requirements..."></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="submitManufacturerRequest()">📤 Send Order to Manufacturer</button>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:1.5rem">
+        <h3 class="form-card-title">📜 My Sent Orders</h3>
+        <table class="data-table">
+          <thead><tr><th>Request ID</th><th>Manufacturer</th><th>Material</th><th>Qty</th><th>Status</th><th>Barcode</th><th>Date</th></tr></thead>
+          <tbody id="my-mfr-requests-tbody"><tr><td colspan="7" class="empty-td">No orders sent yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RETAILER ORDERS (NAYA) -->
+    <div class="content-section" id="section-retail-orders">
+      <div class="section-header"><div><h1>🛒 Retailer Orders</h1><p class="section-desc">Orders from retailers — accept and fulfill via split</p></div></div>
+      <div class="form-card">
+        <div class="alert" id="retail-order-alert"></div>
+        <!-- Hidden field for linked retail request -->
+        <input type="hidden" id="split-retail-req-id" value=""/>
+        <h3 class="form-card-title">📋 Pending & Accepted Retailer Orders</h3>
+        <table class="data-table">
+          <thead><tr><th>Request ID</th><th>Retailer</th><th>Material</th><th>Qty</th><th>Notes</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody id="retail-orders-tbody"><tr><td colspan="7" class="empty-td">No orders from retailers yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RECEIVE SHIPMENT -->
+    <div class="content-section" id="section-receive">
+      <div class="section-header"><div><h1>📥 Receive Shipment</h1><p class="section-desc">Accept and verify shipments from manufacturer via barcode scan</p></div></div>
+      <div class="form-card">
+        <h3>🔍 Enter / Scan Barcode ID from Manufacturer</h3>
+        <div class="alert" id="receive-alert"></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Barcode ID <span class="req">*</span></label>
+            <div class="input-with-btn">
+              <input type="text" id="receive-barcode-id" class="form-input" placeholder="MFR-XXXX-XXXXX"/>
+              <button class="btn-secondary" onclick="verifyDistReceive()">🔍 Verify</button>
+            </div>
+          </div>
+        </div>
+        <div id="dist-verify-result"></div>
+        <div id="dist-confirm-form" style="display:none">
+          <div class="form-grid" style="margin-top:1rem">
+            <div class="form-group"><label>Received At City</label>
+              <select id="dist-receive-city" class="form-input"><option value="">-- Select City --</option></select>
+            </div>
+            <div class="form-group"><label>Vehicle Number</label><input type="text" id="dist-receive-vehicle" class="form-input" placeholder="Vehicle no."/></div>
+            <div class="form-group"><label>Received By</label><input type="text" id="dist-receive-by" class="form-input" placeholder="Name"/></div>
+          </div>
+          <button class="btn-primary" onclick="confirmDistReceive()">✅ Confirm Receipt — Update Blockchain</button>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:1.5rem">
+        <h3>All Received Batches</h3>
+        <table class="data-table"><thead><tr><th>Barcode ID</th><th>Material</th><th>Total Qty</th><th>Remaining</th><th>From</th><th>Received At</th><th>City</th><th>Action</th></tr></thead>
+        <tbody id="dist-received-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="content-section" id="section-inventory">
+      <div class="section-header"><div><h1>🏪 My Inventory</h1><p class="section-desc">Received batches with remaining quantities</p></div></div>
+      <div class="form-card">
+        <table class="data-table"><thead><tr><th>Barcode ID</th><th>Material</th><th>Total Qty</th><th>Remaining</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="inventory-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SPLIT & DISPATCH -->
+    <div class="content-section" id="section-split">
+      <div class="section-header"><div><h1>✂️ Split & Dispatch</h1><p class="section-desc">Split batches — Parent QR se Child QR generate hoga har retailer ke liye</p></div></div>
+      <div class="form-card">
+        <h3>Select Batch to Split</h3>
+        <div class="alert" id="split-alert"></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Parent Barcode ID <span class="req">*</span></label>
+            <div class="input-with-btn">
+              <input type="text" id="split-parent-id" class="form-input" placeholder="MFR-XXXX received barcode"/>
+              <button class="btn-secondary" onclick="loadParentForSplit()">🔍 Load</button>
+            </div>
+          </div>
+        </div>
+        <div id="split-parent-info"></div>
+        <div id="split-form" style="display:none">
+          <div class="split-header">
+            <h4>Add Retailer Splits</h4>
+            <p id="split-remaining-label" style="color:var(--navy);font-weight:600"></p>
+            <button class="btn-secondary" onclick="addSplitRow()">+ Add Retailer</button>
+          </div>
+          <div id="split-rows"></div>
+          <div class="form-grid" style="margin-top:1rem">
+            <div class="form-group"><label>Dispatch City</label>
+              <select id="split-city" class="form-input"><option value="">-- Select City --</option></select>
+            </div>
+            <div class="form-group"><label>Common Vehicle No.</label><input type="text" id="split-vehicle" class="form-input" placeholder="MH12AB1234"/></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" onclick="submitSplit()">✂️ Split & Generate Child Barcodes</button>
+          </div>
+        </div>
+        <div id="split-qr-results" style="display:none">
+          <h4 style="color:var(--green);margin:1rem 0 0.5rem">✅ Split Complete — Retailer ko scan karke receive karna hoga:</h4>
+          <div id="split-qr-grid" class="qr-cards-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR MANAGER -->
+    <div class="content-section" id="section-qr">
+      <div class="section-header"><div><h1>🔲 QR Code Manager</h1></div></div>
+      <div id="qr-cards-grid" class="qr-cards-grid"></div>
+    </div>
+
+    <!-- SCAN -->
+    <div class="content-section" id="section-scan">
+      <div class="section-header"><div><h1>📷 Scan / Verify Barcode</h1></div></div>
+      <div class="form-card">
+        <div class="form-group">
+          <div class="input-with-btn">
+            <input type="text" id="scan-input" class="form-input" placeholder="Enter barcode ID"/>
+            <button class="btn-primary" onclick="scanQR()">🔍 Verify</button>
+          </div>
+        </div>
+        <div id="scan-result" style="margin-top:1rem"></div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="content-section" id="section-history">
+      <div class="section-header"><div><h1>📜 Activity History</h1></div></div>
+      <div class="form-card">
+        <table class="data-table"><thead><tr><th>#</th><th>ID</th><th>Type</th><th>Material</th><th>Qty</th><th>Party</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody id="history-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="content-section" id="section-profile">
+      <div class="section-header"><div><h1>🏢 My Profile</h1></div></div>
+      <div class="form-card">
+        <div class="profile-grid">
+          <div class="profile-row"><span class="profile-label">Company</span><span class="profile-value" id="prof-company">—</span></div>
+          <div class="profile-row"><span class="profile-label">Email</span><span class="profile-value" id="prof-email">—</span></div>
+          <div class="profile-row"><span class="profile-label">Phone</span><span class="profile-value" id="prof-phone">—</span></div>
+          <div class="profile-row"><span class="profile-label">Owner</span><span class="profile-value" id="prof-owner">—</span></div>
+          <div class="profile-row"><span class="profile-label">State</span><span class="profile-value" id="prof-state">—</span></div>
+          <div class="profile-row"><span class="profile-label">GST</span><span class="profile-value" id="prof-gst">—</span></div>
+          <div class="profile-row"><span class="profile-label">URN</span><span class="profile-value" id="prof-urn">—</span></div>
+          <div class="profile-row"><span class="profile-label">Dist. License</span><span class="profile-value" id="prof-dist">—</span></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- CHAIN MODAL -->
+<div class="modal-overlay" id="chain-modal">
+  <div class="modal-box modal-lg">
+    <div class="modal-header"><h3>🔗 Chain — <span id="chain-modal-id"></span></h3><button class="modal-close" onclick="closeModal('chain-modal')">✕</button></div>
+    <div class="modal-body">
+      <p style="color:var(--gray);margin-bottom:0.5rem"><strong>Material:</strong> <span id="chain-modal-material"></span></p>
+      <div class="chain-qr-row"><div id="chain-modal-qr"></div></div>
+      <div id="chain-modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="barcode-engine.js"></script>
+<script src="distributor.js?v=10"></script>
+</body>
+</html>
